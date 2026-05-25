@@ -1,0 +1,190 @@
+/* ============== BestMovers.css ============== */
+
+.best-hero {
+  height: 100vh;
+  min-height: 650px;
+  background-color: #01016f;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.best-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(1,1,111,0.88), rgba(1,1,111,0.92));
+}
+
+.best-content {
+  text-align: center;
+  max-width: 900px;
+  padding: 0 20px;
+}
+
+.best-title {
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 900;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .best-title { font-size: 56px; }
+}
+
+.best-subtitle {
+  font-size: 26px;
+  color: #60a5fa;
+  margin-bottom: 40px;
+}
+
+/* Buttons */
+.btn {
+  padding: 16px 40px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-primary:hover { background: #dc2626; transform: translateY(-3px); }
+
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255,255,255,0.7);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ================= Trust Logos Section ================= */
+.trust-logos-section {
+  padding: 60px 20px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.trust-logos-container {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.trust-logos-track {
+  display: flex;
+  gap: 50px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.trust-logo-item {
+  text-align: center;
+  min-width: 160px;
+}
+
+.trust-logo-item img {
+  height: 65px;
+  object-fit: contain;
+  filter: grayscale(30%);
+  transition: 0.3s;
+}
+
+.trust-logo-item:hover img {
+  filter: grayscale(0%);
+  transform: scale(1.08);
+}
+
+.rating-text {
+  margin-top: 8px;
+  font-weight: 600;
+  color: #22c55e;
+}
+
+/* Navigation Buttons */
+.logo-nav-btn {
+  width: 45px;
+  height: 45px;
+  background: #01016f;
+  color: white;
+  border: none;
+  font-size: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .logo-nav-btn { display: flex; align-items: center; justify-content: center; }
+}
+
+/* Gallery Swiper */
+.swiper-section {
+  padding: 80px 20px;
+  background: #f8f9fa;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 38px;
+  font-weight: 800;
+  color: #0A1D8F;
+  margin-bottom: 50px;
+}
+
+.swiper-container {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.swiper-image {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+}
+
+.swiper-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 55px;
+  height: 55px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  font-size: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.swiper-btn:hover {
+  background: #ef4444;
+}
+
+.swiper-btn.prev { left: 20px; }
+.swiper-btn.next { right: 20px; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}

@@ -1,0 +1,151 @@
+/* ============== Trusted.css ============== */
+
+.trusted-hero {
+  height: 70vh;
+  min-height: 650px;
+  background-color: #01016f;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  overflow: hidden;
+}
+
+.trusted-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(1, 1, 111, 0.85), rgba(1, 1, 111, 0.9));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trusted-content {
+  text-align: center;
+  max-width: 900px;
+  padding: 0 20px;
+  z-index: 2;
+}
+
+.trusted-title {
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 900;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .trusted-title {
+    font-size: 58px;
+  }
+}
+
+.trusted-subtitle {
+  font-size: 28px;
+  font-weight: 500;
+  color: #60a5fa;
+  margin-bottom: 40px;
+}
+
+.trusted-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .trusted-buttons {
+    flex-direction: row;
+  }
+}
+
+/* Button Styles */
+.btn {
+  padding: 16px 40px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #dc2626;
+  transform: translateY(-3px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: white;
+  border: 2px solid rgba(255,255,255,0.6);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255,255,255,0.1);
+  border-color: white;
+}
+
+/* Trust Section */
+.trust-section {
+  padding: 100px 20px;
+  background-color: #f8f9fa;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 38px;
+  font-weight: 800;
+  color: #0A1D8F !important;
+  margin-bottom: 60px;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+}
+
+.trust-card {
+  background: white;
+  padding: 40px 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
+}
+
+.trust-card:hover {
+  transform: translateY(-10px);
+}
+
+.trust-number {
+  font-size: 48px;
+  font-weight: 900;
+  color: #01016f;
+  margin-bottom: 8px;
+}
+
+.trust-label {
+  font-size: 18px;
+  color: #374151;
+  font-weight: 500;
+}

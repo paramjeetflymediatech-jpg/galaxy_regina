@@ -1,0 +1,311 @@
+/* css/LocationManagement.css */
+
+.location-management {
+
+    margin-top: 40px;
+
+    background: #ffffff;
+
+    padding: 30px;
+
+    border-radius: 18px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+
+    border: 1px solid #e5e7eb;
+
+}
+
+
+/* =========================
+   HEADING
+========================= */
+.location-management h2 {
+
+    margin-bottom: 30px;
+
+    color: #111827;
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================
+   FORM
+========================= */
+.location-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+
+    margin-bottom: 35px;
+
+}
+
+
+/* INPUTS */
+.location-form input,
+.location-form textarea {
+
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+
+    outline: none;
+
+    transition: 0.3s;
+
+    background: #fff;
+
+    color: #111827;
+
+}
+
+
+/* TEXTAREA */
+.location-form textarea {
+
+    min-height: 120px;
+
+    resize: vertical;
+
+}
+
+
+/* FOCUS */
+.location-form input:focus,
+.location-form textarea:focus {
+
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+
+}
+
+
+/* FILE INPUT */
+.location-form input[type="file"] {
+
+    padding: 10px;
+
+    background: #f8fafc;
+
+    cursor: pointer;
+
+}
+
+
+/* BUTTON */
+.location-form button {
+
+    background: #111827;
+
+    color: white;
+
+    border: none;
+
+    padding: 16px 24px;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    font-size: 15px;
+
+    transition: 0.3s;
+
+}
+
+
+/* BUTTON HOVER */
+.location-form button:hover {
+
+    background: #1f2937;
+
+    transform: translateY(-2px);
+
+}
+
+
+/* =========================
+   LOCATION LIST
+========================= */
+.location-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+
+}
+
+
+/* CARD */
+.location-item {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 20px;
+
+    padding: 20px;
+
+    background: #f8fafc;
+
+    border-radius: 16px;
+
+    border: 1px solid #e2e8f0;
+
+    transition: 0.3s;
+
+}
+
+
+/* CARD HOVER */
+.location-item:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+
+}
+
+
+/* IMAGE */
+.location-item img {
+
+    width: 140px;
+
+    height: 100px;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+
+    margin-bottom: 12px;
+
+    border: 1px solid #d1d5db;
+
+}
+
+
+/* TITLE */
+.location-item h3 {
+
+    margin-bottom: 8px;
+
+    color: #111827;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+}
+
+
+/* TEXT */
+.location-item p {
+
+    margin-bottom: 6px;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+}
+
+
+/* STRONG */
+.location-item strong {
+
+    color: #111827;
+
+}
+
+
+/* DELETE BUTTON */
+.delete-btn {
+
+    background: #dc2626;
+
+    color: white;
+
+    border: none;
+
+    padding: 12px 18px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: 0.3s;
+
+}
+
+
+/* DELETE HOVER */
+.delete-btn:hover {
+
+    background: #b91c1c;
+
+    transform: translateY(-2px);
+
+}
+
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+
+    .location-management {
+
+        padding: 20px;
+
+    }
+
+    .location-item {
+
+        flex-direction: column;
+
+    }
+
+    .location-item img {
+
+        width: 100%;
+
+        height: 220px;
+
+    }
+
+    .delete-btn {
+
+        width: 100%;
+
+    }
+
+}

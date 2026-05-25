@@ -1,0 +1,136 @@
+/* ============== RecentWork.css ============== */
+
+.recent-work {
+  padding: 100px 20px;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-title {
+  font-size: 38px;
+  font-weight: 900;
+  color: #0A1D8F;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.sub-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ef4444;
+  margin-bottom: 50px;
+}
+
+/* Slider */
+.slider-container {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.slider-wrapper {
+  overflow: hidden;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.6s ease-in-out;
+  width: 100%;
+}
+
+.slide {
+  min-width: 100%;
+  position: relative;
+}
+
+.work-image {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(1, 1, 111, 0.85));
+  padding: 40px 30px 30px;
+  color: white;
+}
+
+.work-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Navigation Buttons */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 55px;
+  height: 55px;
+  font-size: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s;
+}
+
+.slider-btn:hover {
+  background: #ef4444;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prev { left: 20px; }
+.next { right: 20px; }
+
+/* Dots */
+.slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.dot.active {
+  background: #ef4444;
+  width: 35px;
+  border-radius: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 32px;
+  }
+  .sub-title {
+    font-size: 20px;
+  }
+  .work-image {
+    height: 420px;
+  }
+}

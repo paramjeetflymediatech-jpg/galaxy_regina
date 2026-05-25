@@ -1,0 +1,145 @@
+/* ============== Blog.css ============== */
+
+.blog-hero {
+  height: 520px;
+  background: linear-gradient(rgba(1,1,111,0.75), rgba(1,1,111,0.8)),
+              url('https://images.unsplash.com/photo-1586528116311-ad8dd3c83137?w=1200') center/cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  position: relative;
+}
+
+.hero-overlay {
+ 
+  padding: 0 20px;
+}
+
+.hero-content h1 {
+  font-size: 52px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.hero-content p {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+/* Blog Container */
+.blog-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.blog-header {
+  margin-bottom: 40px;
+}
+
+.blog-tabs {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tab {
+  padding: 12px 28px;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  background: #0A1D8F;
+  color: white;
+}
+
+/* Blog Grid */
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 30px;
+}
+
+.blog-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  transition: all 0.4s;
+}
+
+.blog-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.blog-image img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+.blog-content {
+  padding: 25px;
+}
+
+.blog-date {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.blog-content h3 {
+  font-size: 20px;
+  line-height: 1.3;
+  margin-bottom: 12px;
+  color: #0A1D8F;
+}
+
+.blog-content p {
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.read-more {
+  color: #ef4444;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.read-more:hover {
+  text-decoration: underline;
+}
+
+/* Load More */
+.load-more {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.load-btn {
+  background: #0A1D8F;
+  color: white;
+  padding: 16px 50px;
+  border: none;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.load-btn:hover {
+  background: #ef4444;
+  transform: scale(1.05);
+}

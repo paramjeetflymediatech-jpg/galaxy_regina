@@ -1,0 +1,151 @@
+/* ============== Services.css ============== */
+
+.services-hero {
+  background: #01016f;
+  color: white;
+  padding: 100px 20px 80px;
+  text-align: center;
+}
+
+.services-content {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-tag {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: #d7dbe0;
+  margin-bottom: 12px;
+}
+
+.main-title {
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  color: #fff !important;
+}
+
+@media (min-width: 768px) {
+  .main-title { font-size: 52px; }
+}
+
+.description {
+  font-size: 18px;
+  line-height: 1.7;
+  max-width: 850px;
+  margin: 0 auto;
+  color: #e0e7ff;
+}
+
+.highlight {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Services Grid */
+.services-grid-section {
+  padding: 80px 20px;
+  background: #f8f9fa;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 30px;
+}
+
+.service-card {
+  position: relative;
+  height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.service-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.service-card:hover .service-image {
+  transform: scale(1.08);
+}
+
+.service-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(1,1,111,0.95), rgba(1,1,111,0.7), transparent);
+  display: flex;
+  align-items: flex-end;
+  padding: 40px 30px;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.service-card:hover .service-overlay {
+  opacity: 1;
+}
+
+.service-info {
+  color: white;
+  width: 100%;
+}
+
+.service-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.service-desc {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  opacity: 0.95;
+}
+
+.view-more-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.view-more-btn:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .service-card {
+    height: 380px;
+  }
+}
