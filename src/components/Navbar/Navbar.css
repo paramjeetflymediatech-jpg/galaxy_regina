@@ -1,7 +1,5 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Tailwind handles the global CSS reset (margin, padding, box-sizing) */
+.navbar {
   font-family: "Poppins", sans-serif;
 }
 

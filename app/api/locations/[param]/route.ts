@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Location } from '@/src/lib/models';
+import { Location, Service } from '@/src/lib/models';
 import { saveUploadedFile } from '@/src/lib/uploadHelper';
 
 type Params = {
@@ -21,11 +21,21 @@ export async function GET(
 ) {
   try {
     const { param } = await context.params;
+    const url = new URL(request.url);
+    const serviceSlug = url.searchParams.get('service');
 
     // Check if the param is a numeric ID or a string slug
     const isNumeric = /^\d+$/.test(param);
     const location = await Location.findOne({
       where: isNumeric ? { id: parseInt(param, 10) } : { slug: param },
+      include: serviceSlug ? [
+        {
+          model: Service,
+          where: { slug: serviceSlug },
+          required: false,
+          through: { attributes: ['content', 'faqs', 'description'] }
+        }
+      ] : []
     });
 
     if (!location) {
@@ -65,6 +75,8 @@ export async function PUT(
     const meta_title = formData.get('meta_title') as string | null;
     const meta_description = formData.get('meta_description') as string | null;
     const meta_keywords = formData.get('meta_keywords') as string | null;
+    const province_id_str = formData.get('province_id') as string | null;
+    const district_id_str = formData.get('district_id') as string | null;
     const image = formData.get('image');
 
     if (!location_name) {
@@ -97,6 +109,8 @@ export async function PUT(
       meta_title: meta_title !== null ? meta_title : location.meta_title,
       meta_description: meta_description !== null ? meta_description : location.meta_description,
       meta_keywords: meta_keywords !== null ? meta_keywords : location.meta_keywords,
+      province_id: province_id_str ? parseInt(province_id_str, 10) : location.province_id,
+      district_id: district_id_str ? parseInt(district_id_str, 10) : location.district_id,
       image_url: image_url !== null ? image_url : location.image_url,
     });
 

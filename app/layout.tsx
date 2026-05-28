@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import { Content } from "@/src/lib/models";
 
@@ -58,6 +59,7 @@ export default async function RootLayout({
       </head>
 
       <body className="min-h-full flex flex-col">
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         {/* Header scripts injection immediately inside body */}
         {header && (
           <div

@@ -41,6 +41,7 @@ const Blog = () => {
         <div className="blog-header">
           <div className="blog-tabs">
             <button className="tab active">All Posts</button>
+            <button className="tab">Local Movers</button>
           </div>
         </div>
 
@@ -49,8 +50,9 @@ const Blog = () => {
         ) : blogPosts.length === 0 ? (
           <h2>No Blogs Found</h2>
         ) : (
-          <div className="blog-grid">
-            {blogPosts.map((post) => (
+          <>
+            <div className="blog-grid">
+              {blogPosts.map((post) => (
               <div className="blog-card" key={post.id}>
                 <div className="blog-image">
                   {post.image_url && (
@@ -62,21 +64,26 @@ const Blog = () => {
                   )}
                 </div>
                 <div className="blog-content">
-                  <span className="blog-date">
-                    {new Date(post.created_at || post.createdAt).toDateString()}
-                  </span>
                   <h3>{post.title}</h3>
-                  <p>{post.description}</p>
+                  <span className="blog-date">
+                    {new Date(post.created_at || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} /
+                  </span>
+                  <p>{post.short_description || (post.description ? post.description.substring(0, 120) + '...' : '')}</p>
                   <a
                     href={`/blog/${post.slug}`}
                     className="read-more"
                   >
-                    Read More →
+                    Read More
                   </a>
                 </div>
               </div>
             ))}
           </div>
+          
+          <div className="load-more">
+            <button className="load-btn">Load More</button>
+          </div>
+          </>
         )}
 
       </div>

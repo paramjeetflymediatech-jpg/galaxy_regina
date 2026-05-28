@@ -1,0 +1,86 @@
+[
+  {
+    "title": "Antique And Art Movers",
+    "slug": "antique-and-art-movers",
+    "short_description": "Specialized, climate-controlled moving services for delicate antiques and high-value fine art.",
+    "content": "<p>Moving antiques and fine art requires a level of precision, care, and expertise far beyond standard household relocations. These items are not just possessions; they are often irreplaceable.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Appliances Movers",
+    "slug": "appliances-movers",
+    "short_description": "Safe and secure transportation for heavy household and commercial appliances.",
+    "content": "<p>Our expert appliance movers use specialized dollies and padding to ensure your refrigerators, washers, and ovens are moved safely without damaging your floors or the appliances themselves.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Commercial Movers",
+    "slug": "commercial-movers",
+    "short_description": "Efficient office and business relocation services designed to minimize downtime.",
+    "content": "<p>We offer full-scale commercial moving services. Whether you are relocating a small office or a large corporate headquarters, our team ensures a seamless transition with minimal disruption to your business operations.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Condo And Apartment Movers",
+    "slug": "condo-and-apartment-movers",
+    "short_description": "Expert navigation of stairs, elevators, and tight spaces for apartment moves.",
+    "content": "<p>Moving into or out of a condo or apartment comes with unique challenges like booking elevators and navigating tight corridors. Our experienced team handles all the logistics for a smooth move.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Cross Country Movers",
+    "slug": "cross-country-movers",
+    "short_description": "Reliable long-haul moving services across Canada with dedicated logistical support.",
+    "content": "<p>Planning a move across the country? Our cross-country moving services provide comprehensive logistical planning, secure transport, and real-time tracking to ensure your belongings arrive safely.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Furniture Movers",
+    "slug": "furniture-movers",
+    "short_description": "Professional wrapping, disassembly, and transportation of heavy and delicate furniture.",
+    "content": "<p>Our professional furniture movers are trained in the proper disassembly, wrapping, and transport of all types of furniture, ensuring every piece arrives at your new home in perfect condition.</p>",
+    "is_active": true
+  },
+  {
+    "title": "House Movers",
+    "slug": "house-movers",
+    "short_description": "Comprehensive residential moving services tailored to homes of all sizes.",
+    "content": "<p>From packing your first box to placing the last piece of furniture in your new home, our comprehensive house moving services take the stress out of your residential relocation.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Long Distance Movers",
+    "slug": "long-distance-movers",
+    "short_description": "Secure and timely moving services for inter-provincial and long-distance relocations.",
+    "content": "<p>Long-distance moves require meticulous planning. We provide dedicated trucks and experienced drivers to ensure your inter-provincial move is handled with the utmost care and efficiency.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Movers",
+    "slug": "movers",
+    "short_description": "Standard, reliable moving services for local relocations.",
+    "content": "<p>Looking for reliable local movers? Our standard moving services offer efficient, safe, and cost-effective solutions for your everyday relocation needs.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Piano Movers",
+    "slug": "piano-movers",
+    "short_description": "Specialized equipment and highly trained crews for secure piano transportation.",
+    "content": "<p>Pianos are heavy, delicate, and valuable. Our specialized piano moving team uses custom equipment and techniques to navigate stairs and tight spaces, ensuring your instrument is perfectly protected.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Seniors Movers",
+    "slug": "seniors-movers",
+    "short_description": "Compassionate, full-service moving and downsizing assistance for seniors.",
+    "content": "<p>We offer compassionate and patient moving services tailored for seniors. Whether downsizing or moving to a retirement community, we handle everything from packing to unpacking to make the transition as easy as possible.</p>",
+    "is_active": true
+  },
+  {
+    "title": "Student Movers",
+    "slug": "student-movers",
+    "short_description": "Affordable and flexible moving services perfect for university and college students.",
+    "content": "<p>Heading to college or university? Our student moving services offer affordable, flexible, and fast relocation solutions for dorm rooms and off-campus housing.</p>",
+    "is_active": true
+  }
+]

@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'production') {
   sequelize = new Sequelize(
     dbName || 'galaxy_regina',
     dbUser || 'root',
-    dbPassword || '',
+    dbPassword || 'root',
     {
       host: dbHost,
       port: dbPort,
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production') {
     global.sequelize = new Sequelize(
       dbName || 'galaxy_regina',
       dbUser || 'root',
-      dbPassword || '',
+      dbPassword || 'root',
       {
         host: dbHost,
         port: dbPort,
