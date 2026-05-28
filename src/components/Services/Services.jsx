@@ -8,37 +8,37 @@ const defaultServices = [
   {
     title: "Local Moving",
     desc: "Our local movers in Regina help you relocate homes, apartments, condos, and small offices safely within the city and nearby areas.",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800",
+    image: "/heavy.jpg",
     slug: 'local-moving'
   },
   {
     title: "Long Distance Moving",
     desc: "We provide reliable long distance moving services from Regina to other cities with safe transport, careful planning, and timely delivery.",
-    image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800",
+    image: "/long_distance.jpg",
     slug: 'long-distance-moving'
   },
   {
     title: "Residential Moving",
     desc: "Move your home with confidence. We handle furniture, appliances, boxes, and personal items carefully for a stress-free residential relocation.",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
+    image: "/house_mover.jpg",
     slug: 'residential-moving'
   },
   {
     title: "Commercial Moving",
     desc: "Our commercial movers support office, shop, and business relocations with organized planning, safe equipment handling, and minimal business interruption.",
-    image: "https://images.unsplash.com/photo-1622290291469-4f5f8c2e1b3e?w=800",
+    image: "/commercial_office_mover.jpg",
     slug: 'commercial-moving'
   },
   {
     title: "Packing Services",
     desc: "We offer professional packing services using proper materials to protect fragile items, furniture, electronics, kitchenware, and valuable belongings.",
-    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800",
+    image: "/packing.jpg",
     slug: 'packing-services'
   },
   {
     title: "Storage Solutions",
     desc: "Need extra space during your move? Our storage solutions help keep your items safe, organized, and accessible when required.",
-    image: "https://images.unsplash.com/photo-1565538810844-1e1194826c94?w=800",
+    image: "/storage.jpg",
     slug: 'storage-solutions'
   },
 ];
