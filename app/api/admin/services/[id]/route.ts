@@ -13,7 +13,7 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
   }
 }
 
-import { saveUploadedFile } from '@/src/lib/uploadHelper';
+import { saveUploadedFile, deleteUploadedFile } from '@/src/lib/uploadHelper';
 
 // UPDATE
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -39,7 +39,12 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     let image_url = service.image_url;
     if (file) {
       const savedPath = await saveUploadedFile(file);
-      if (savedPath) image_url = savedPath;
+      if (savedPath) {
+        if (service.image_url) {
+          await deleteUploadedFile(service.image_url);
+        }
+        image_url = savedPath;
+      }
     }
 
     await service.update({
@@ -65,6 +70,11 @@ export async function DELETE(_req: Request, context: { params: Promise<{ id: str
     const { id } = await context.params;
     const service = await Service.findByPk(id);
     if (!service) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
+    
+    if (service.image_url) {
+      await deleteUploadedFile(service.image_url);
+    }
+    
     await service.destroy();
     return NextResponse.json({ success: true, message: 'Service deleted successfully' });
   } catch (error: any) {

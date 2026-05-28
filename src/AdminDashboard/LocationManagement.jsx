@@ -459,7 +459,7 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
                                                 <td className="py-4 px-6">
                                                     <div className="flex items-center gap-4">
                                                         {loc.image_url ? (
-                                                            <img src={`/uploads/${loc.image_url}`} alt={loc.location_name} className="w-16 h-12 rounded object-cover border border-gray-200 shrink-0" />
+                                                            <img src={loc.image_url.startsWith('http') ? loc.image_url : `/uploads/${loc.image_url}`} alt={loc.location_name} className="w-16 h-12 rounded object-cover border border-gray-200 shrink-0" />
                                                         ) : (
                                                             <div className="w-16 h-12 rounded bg-gray-50 flex items-center justify-center border border-gray-200 shrink-0">
                                                                 <FiImage size={20} className="text-gray-300" />

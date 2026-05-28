@@ -42,6 +42,9 @@ const WhyUs = () => {
           <h2 className="section-title">
             Why Move With <span className="highlight">Galaxy Movers Regina?</span>
           </h2>
+          <h3 className="section-subheading" style={{ fontSize: '24px', fontWeight: '800', color: '#0A1D8F', margin: '15px 0 20px' }}>
+            Reliable Movers for Every Type of Move
+          </h3>
           <p className="section-subtitle">
             Choosing Galaxy Movers Regina means choosing a dependable moving company in Regina that understands your relocation needs. Whether it is a local move, long distance move, office move, packing service, or storage requirement, we deliver professional support, careful handling, and a smooth moving experience.
           </p>

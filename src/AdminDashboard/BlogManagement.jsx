@@ -362,7 +362,7 @@ const BlogManagement = forwardRef(({ onFormStateChange }, ref) => {
                                             <div className="flex items-center gap-4">
                                                 {blog.image_url ? (
                                                     <img
-                                                        src={`/uploads/${blog.image_url}`}
+                                                        src={blog.image_url.startsWith('http') ? blog.image_url : `/uploads/${blog.image_url}`}
                                                         alt={blog.title}
                                                         className="w-16 h-12 rounded object-cover border border-gray-200 shrink-0"
                                                     />

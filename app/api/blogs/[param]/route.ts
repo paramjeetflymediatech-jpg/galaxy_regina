@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Blog } from '@/src/lib/models';
-import { saveUploadedFile } from '@/src/lib/uploadHelper';
+import { saveUploadedFile, deleteUploadedFile } from '@/src/lib/uploadHelper';
 
 type Params = {
   param: string;
@@ -77,6 +77,9 @@ export async function PUT(
 
     // Save image if uploaded
     const image_url = await saveUploadedFile(image);
+    if (image_url !== null && blog.image_url) {
+      await deleteUploadedFile(blog.image_url);
+    }
 
     await blog.update({
       title,
@@ -118,6 +121,10 @@ export async function DELETE(
         { success: false, message: 'Blog post not found' },
         { status: 404 }
       );
+    }
+
+    if (blog.image_url) {
+      await deleteUploadedFile(blog.image_url);
     }
 
     await blog.destroy();

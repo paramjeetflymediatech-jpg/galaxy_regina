@@ -138,7 +138,7 @@ export default async function BlogPostPage({ params }) {
           {post.image_url && (
             <div className="mb-10 overflow-hidden rounded-xl shadow-lg aspect-video relative">
               <img
-                src={`/uploads/${post.image_url}`}
+                src={post.image_url.startsWith('http') ? post.image_url : `/uploads/${post.image_url}`}
                 alt={post.title}
                 className="w-full h-full object-cover"
               />

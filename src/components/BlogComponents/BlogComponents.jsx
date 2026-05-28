@@ -57,7 +57,7 @@ const Blog = () => {
                 <div className="blog-image">
                   {post.image_url && (
                     <img
-                      src={`/uploads/${post.image_url}`}
+                      src={post.image_url.startsWith('http') ? post.image_url : `/uploads/${post.image_url}`}
                       alt={post.title}
                       className="blog-img"
                     />

@@ -119,6 +119,9 @@ const Services = () => {
         <div className="services-content">
           <h2 className="section-tag">SERVICES</h2>
           <h1 className="main-title">{servicesSection.title}</h1>
+          <h2 className="sub-title-service" style={{ fontSize: '2rem', fontWeight: '800', color: '#ef4444', margin: '15px 0 25px', textTransform: 'uppercase' }}>
+            Complete Moving and Storage Services in Regina
+          </h2>
           <p className="description">{servicesSection.description}</p>
         </div>
       </section>

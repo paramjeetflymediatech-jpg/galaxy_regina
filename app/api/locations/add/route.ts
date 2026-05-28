@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Location } from '@/src/lib/models';
-import { saveUploadedFile } from '@/src/lib/uploadHelper';
+import { saveUploadedFile, deleteUploadedFile } from '@/src/lib/uploadHelper';
 
 const createSlug = (text: string) => {
   return text
@@ -39,6 +39,9 @@ export async function POST(request: Request) {
     // Replicate ON DUPLICATE KEY UPDATE behavior with explicit find and create/update
     let location = await Location.findOne({ where: { slug } });
     if (location) {
+      if (image_url !== null && location.image_url) {
+        await deleteUploadedFile(location.image_url);
+      }
       await location.update({
         location_name,
         hero_title: hero_title !== null ? hero_title : location.hero_title,

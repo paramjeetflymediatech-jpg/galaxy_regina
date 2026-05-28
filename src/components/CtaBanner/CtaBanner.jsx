@@ -6,6 +6,9 @@ const CtaBanner = () => {
     <section className="cta-banner">
       <div className="cta-overlay">
         <div className="cta-content">
+          <span className="cta-tag" style={{ color: '#ef4444', fontWeight: '800', letterSpacing: '2px', fontSize: '1.1rem', display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
+            START YOUR REGINA MOVING JOURNEY WITH US TODAY
+          </span>
           <h2 className="cta-title">
             Book Professional Movers in Regina Today
           </h2>

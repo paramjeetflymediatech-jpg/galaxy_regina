@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Location, Service } from '@/src/lib/models';
-import { saveUploadedFile } from '@/src/lib/uploadHelper';
+import { saveUploadedFile, deleteUploadedFile } from '@/src/lib/uploadHelper';
 
 type Params = {
   param: string;
@@ -99,6 +99,9 @@ export async function PUT(
     
     // Save image if uploaded
     const image_url = await saveUploadedFile(image);
+    if (image_url !== null && location.image_url) {
+      await deleteUploadedFile(location.image_url);
+    }
 
     await location.update({
       location_name,
@@ -143,6 +146,10 @@ export async function DELETE(
         { success: false, message: 'Location not found' },
         { status: 404 }
       );
+    }
+
+    if (location.image_url) {
+      await deleteUploadedFile(location.image_url);
     }
 
     await location.destroy();
