@@ -478,7 +478,18 @@ ServiceLocation.init(
     content: { type: DataTypes.TEXT, allowNull: true },
     faqs: { type: DataTypes.TEXT, allowNull: true },
   },
-  { sequelize, tableName: 'service_locations', underscored: true }
+  {
+    sequelize,
+    tableName: 'service_locations',
+    underscored: true,
+    indexes: [
+      {
+        unique: true,
+        name: 'unique_service_location',
+        fields: ['service_id', 'location_id'],
+      },
+    ],
+  }
 );
 
 Service.belongsToMany(Location, { through: ServiceLocation, foreignKey: 'service_id' });

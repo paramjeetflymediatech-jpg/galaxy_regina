@@ -36,9 +36,10 @@ export async function PUT(
       value: value !== null && value !== undefined ? String(value) : null,
     }));
 
-    // Perform bulk create with MySQL's ON DUPLICATE KEY UPDATE value = VALUES(value)
+    // Perform bulk create with Postgres ON CONFLICT DO UPDATE
     const result = await Content.bulkCreate(rows, {
       updateOnDuplicate: ['value'],
+      conflictAttributes: ['page', 'section', 'key'], // Required for PostgreSQL
     });
 
     return NextResponse.json({

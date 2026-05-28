@@ -1,10 +1,10 @@
+import 'dotenv/config';
 import fs from 'fs';
-import dotenv from 'dotenv';
-dotenv.config({ path: './.env' });
 
 import { sequelize } from './src/lib/db';
 import { State, District, Location, Service, ServiceLocation, Seo } from './src/lib/models';
 
+const BATCH_SIZE = 100;
 
 const slugify = (text) => {
   if (!text) return '';
@@ -34,228 +34,253 @@ function getServiceName(slug) {
     .join(' ');
 }
 
+async function bulkUpsert(Model, rows, conflictFields, updateFields) {
+  if (rows.length === 0) return;
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const chunk = rows.slice(i, i + BATCH_SIZE);
+    await Model.bulkCreate(chunk, {
+      updateOnDuplicate: updateFields,
+      conflictAttributes: conflictFields,
+    });
+    process.stdout.write(`\r  ↳ Bulk upserted ${Math.min(i + BATCH_SIZE, rows.length)} / ${rows.length}`);
+  }
+  console.log('');
+}
+
 async function main() {
   try {
     console.log('Connecting to database...');
     await sequelize.authenticate();
-    console.log('Sequelize connected successfully.');
+    console.log('✅ Connected.\n');
 
     const jsonPath = 'servicecontant.json';
     if (!fs.existsSync(jsonPath)) {
-      throw new Error(`File not found: ${jsonPath}. Please run "node scripts/generate_services.js" first.`);
+      throw new Error(`File not found: ${jsonPath}`);
     }
 
     console.log(`Reading ${jsonPath}...`);
     const entries = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-    console.log(`Loaded ${entries.length} service entries from JSON.`);
+    console.log(`Loaded ${entries.length} entries.\n`);
 
-    let processedCount = 0;
-    let createdStatesCount = 0;
-    let createdLocationsCount = 0;
-    let createdServicesCount = 0;
-    let createdServiceLocationsCount = 0;
-    let updatedServiceLocationsCount = 0;
-    let createdSeoCount = 0;
-    let updatedSeoCount = 0;
-
-    // Cache objects to minimize queries
-    const stateCache = {};
-    const districtCache = {};
-    const stateDistrictMap = {};
-    const locationCache = {};
-    const serviceCache = {};
-
-    // Warm caches with existing DB data
-    const existingStates = await State.findAll();
-    existingStates.forEach(s => {
-      stateCache[s.name.toLowerCase()] = s;
-    });
-
+    // ──────────────────────────────────────────────
+    // PHASE 1: Warm in-memory caches from DB
+    // ──────────────────────────────────────────────
+    console.log('📦 Loading existing DB records into cache...');
+    const existingStates    = await State.findAll();
     const existingDistricts = await District.findAll();
-    existingDistricts.forEach(d => {
-      districtCache[`${d.state_id}_${d.name.toLowerCase()}`] = d;
-      if (!stateDistrictMap[d.state_id]) {
-        stateDistrictMap[d.state_id] = d;
-      }
-    });
-
     const existingLocations = await Location.findAll();
+    const existingServices  = await Service.findAll();
+
+    const stateCache    = {};  // lowercase name → state obj
+    const districtMap   = {};  // state.id → district obj
+    const locationCache = {};  // `${state.id}_${lowercase city}` → location obj
+    const slugSet       = new Set();  // all existing location slugs
+    const serviceCache  = {};  // slug → service obj
+
+    existingStates.forEach(s => { stateCache[s.name.toLowerCase()] = s; });
+    existingDistricts.forEach(d => { if (!districtMap[d.province_id]) districtMap[d.province_id] = d; });
     existingLocations.forEach(l => {
-      locationCache[`${l.state_id}_${l.name.toLowerCase()}`] = l;
+      locationCache[`${l.province_id}_${l.location_name.toLowerCase()}`] = l;
+      slugSet.add(l.slug);
     });
+    existingServices.forEach(s => { serviceCache[s.slug] = s; });
 
-    const existingServices = await Service.findAll();
-    existingServices.forEach(s => {
-      serviceCache[s.slug] = s;
-    });
+    console.log(`  States: ${existingStates.length}, Districts: ${existingDistricts.length}, Locations: ${existingLocations.length}, Services: ${existingServices.length}\n`);
 
-    console.log(`Caches loaded. Found in DB: ${existingStates.length} States, ${existingDistricts.length} Districts, ${existingLocations.length} Locations, ${existingServices.length} Services.`);
+    // ──────────────────────────────────────────────
+    // PHASE 2: Build missing States, Districts, Locations, Services
+    // ──────────────────────────────────────────────
+    console.log('🏗️  Resolving States, Locations & Services...');
 
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
-      const {
-        city,
-        state: stateName,
-        service_slug: serviceSlug,
-        content,
-        faqs,
-        meta_title,
-        meta_description,
-        og_title,
-        og_description,
-        canonical_url,
-        keywords,
-        path: pagePath
-      } = entry;
+    const newStates    = [];
+    const newDistricts = [];
+    const newLocations = [];
+    const newServices  = [];
 
-      if (!city || !stateName || !serviceSlug) {
-        console.warn(`Row ${i + 1}: Skipping due to missing required fields (city, state, or service_slug).`);
-        continue;
-      }
+    // Collect unique values first (avoid duplicates across entries)
+    const pendingStates    = new Map(); // lowercase name → name
+    const pendingLocations = new Map(); // key → {city, stateLower}
+    const pendingServices  = new Map(); // slug → slug
 
-      processedCount++;
+    for (const entry of entries) {
+      const { city, state: stateName, service_slug: serviceSlug } = entry;
+      if (!city || !stateName || !serviceSlug) continue;
 
-      // 1. Resolve State
-      const stateNameLower = stateName.toLowerCase();
-      let state = stateCache[stateNameLower];
-      if (!state) {
-        state = await State.create({
-          name: stateName,
-          slug: slugify(stateName),
-          is_active: true
-        });
-        stateCache[stateNameLower] = state;
-        createdStatesCount++;
-        console.log(`+ Created State: ${stateName}`);
-      }
+      const stateLower = stateName.toLowerCase();
+      pendingStates.set(stateLower, stateName);
 
-      // 2. Resolve Location (City)
-      const locationKey = `${state.id}_${city.toLowerCase()}`;
-      let location = locationCache[locationKey];
-      if (!location) {
-        // Resolve District
-        let district = stateDistrictMap[state.id];
-        if (!district) {
-          const defaultDistrictName = `${state.name} Region`;
-          const [d, dCreated] = await District.findOrCreate({
-            where: { state_id: state.id, name: defaultDistrictName },
-            defaults: { name: defaultDistrictName, state_id: state.id }
-          });
-          district = d;
-          stateDistrictMap[state.id] = district;
-          districtCache[`${state.id}_${defaultDistrictName.toLowerCase()}`] = district;
-          if (dCreated) {
-            console.log(`  + Created District: ${defaultDistrictName}`);
-          }
-        }
+      const locationKey = `${stateLower}_${city.toLowerCase()}`;
+      pendingLocations.set(locationKey, { city, stateLower });
 
-        // Determine unique slug for city
-        const baseSlug = slugify(city);
-        let finalSlug = baseSlug;
+      pendingServices.set(serviceSlug, serviceSlug);
+    }
 
-        const existingLoc = await Location.findOne({ where: { slug: baseSlug } });
-        if (existingLoc && existingLoc.state_id !== state.id) {
-          finalSlug = `${baseSlug}-${slugify(state.name)}`;
-        }
-
-        const slugCollision = await Location.findOne({ where: { slug: finalSlug } });
-        if (slugCollision) {
-          finalSlug = `${finalSlug}-${Date.now()}`;
-        }
-
-        location = await Location.create({
-          name: city,
-          slug: finalSlug,
-          state_id: state.id,
-          district_id: district.id
-        });
-        locationCache[locationKey] = location;
-        createdLocationsCount++;
-        console.log(`  + Created Location: ${city} (Slug: ${finalSlug})`);
-      }
-
-      // 3. Resolve Service
-      let service = serviceCache[serviceSlug];
-      if (!service) {
-        const serviceName = getServiceName(serviceSlug);
-        service = await Service.create({
-          name: serviceName,
-          slug: serviceSlug,
-          description: `Professional ${serviceName} services by Galaxy Movers.`,
-          content: `<p>We offer premium ${serviceName} solutions tailored to your needs.</p>`,
-          faqs: JSON.stringify([])
-        });
-        serviceCache[serviceSlug] = service;
-        createdServicesCount++;
-        console.log(`+ Created Service: ${serviceName} (Slug: ${serviceSlug})`);
-      }
-
-      // 4. Resolve ServiceLocation linking
-      const [serviceLoc, slCreated] = await ServiceLocation.findOrCreate({
-        where: { service_id: service.id, location_id: location.id },
-        defaults: {
-          service_id: service.id,
-          location_id: location.id,
-          description: meta_description,
-          content: content,
-          faqs: JSON.stringify(faqs)
-        }
-      });
-
-      if (slCreated) {
-        createdServiceLocationsCount++;
-      } else {
-        await serviceLoc.update({
-          description: meta_description,
-          content: content,
-          faqs: JSON.stringify(faqs)
-        });
-        updatedServiceLocationsCount++;
-      }
-
-      // 5. Resolve SEO Metadata
-      const [seoRecord, seoCreated] = await Seo.findOrCreate({
-        where: { page_path: pagePath },
-        defaults: {
-          page_path: pagePath,
-          title: meta_title,
-          description: meta_description,
-          keywords: keywords,
-          canonical_url: canonical_url,
-          og_title: og_title,
-          og_description: og_description
-        }
-      });
-
-      if (seoCreated) {
-        createdSeoCount++;
-      } else {
-        await seoRecord.update({
-          title: meta_title,
-          description: meta_description,
-          keywords: keywords,
-          canonical_url: canonical_url,
-          og_title: og_title,
-          og_description: og_description
-        });
-        updatedSeoCount++;
-      }
-
-      if (processedCount % 50 === 0) {
-        console.log(`Processed ${processedCount} of ${entries.length} entries...`);
+    // Create missing States one-by-one (usually very few — one per province)
+    for (const [lower, name] of pendingStates) {
+      if (!stateCache[lower]) {
+        const s = await State.create({ name, slug: slugify(name), is_active: true });
+        stateCache[lower] = s;
+        console.log(`  + State: ${name}`);
       }
     }
 
+    // Create missing Districts (one per state — only if none exists)
+    for (const [lower] of pendingStates) {
+      const state = stateCache[lower];
+      if (state && !districtMap[state.id]) {
+        const districtName = `${state.name} Region`;
+        const distSlug = slugify(districtName);
+        const d = await District.create({ name: districtName, slug: distSlug, province_id: state.id });
+        districtMap[state.id] = d;
+        console.log(`  + District: ${districtName}`);
+      }
+    }
+
+    // Collect missing Locations for bulk insert
+    for (const [key, { city, stateLower }] of pendingLocations) {
+      const state = stateCache[stateLower];
+      if (!state) continue;
+
+      const cacheKey = `${state.id}_${city.toLowerCase()}`;
+      if (locationCache[cacheKey]) continue; // already exists
+
+      const district = districtMap[state.id];
+      const baseSlug = slugify(city);
+      let finalSlug = baseSlug;
+      if (slugSet.has(finalSlug)) {
+        finalSlug = `${baseSlug}-${slugify(state.name)}`;
+        if (slugSet.has(finalSlug)) {
+          finalSlug = `${finalSlug}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        }
+      }
+      slugSet.add(finalSlug);
+
+      newLocations.push({
+        location_name: city,
+        slug: finalSlug,
+        province_id: state.id,
+        district_id: district ? district.id : null,
+        _cacheKey: cacheKey,
+      });
+    }
+
+    // Collect missing Services for bulk insert
+    for (const [slug] of pendingServices) {
+      if (!serviceCache[slug]) {
+        const name = getServiceName(slug);
+        newServices.push({
+          title: name,
+          slug,
+          short_description: `Professional ${name} services by Galaxy Movers.`,
+          content: `<p>We offer premium ${name} solutions tailored to your needs.</p>`,
+          faqs: JSON.stringify([]),
+          is_active: true,
+        });
+      }
+    }
+
+    // Bulk insert new Locations
+    if (newLocations.length > 0) {
+      console.log(`\n⬆️  Inserting ${newLocations.length} new Locations...`);
+      const toInsert = newLocations.map(({ _cacheKey, ...row }) => row);
+      const created = await Location.bulkCreate(toInsert, { returning: true });
+      created.forEach((l, idx) => {
+        locationCache[newLocations[idx]._cacheKey] = l;
+      });
+      console.log(`  ✅ Inserted ${created.length} Locations.`);
+    }
+
+    // Bulk insert new Services
+    if (newServices.length > 0) {
+      console.log(`\n⬆️  Inserting ${newServices.length} new Services...`);
+      const created = await Service.bulkCreate(newServices, { returning: true });
+      created.forEach(s => { serviceCache[s.slug] = s; });
+      console.log(`  ✅ Inserted ${created.length} Services.`);
+    }
+
+    // ──────────────────────────────────────────────
+    // PHASE 3: Build ServiceLocation & SEO bulk upsert rows
+    // ──────────────────────────────────────────────
+    console.log('\n🔗 Building ServiceLocation & SEO upsert rows...');
+
+    const slRows  = [];
+    const seoRows = [];
+    let skipped = 0;
+
+    for (const entry of entries) {
+      const {
+        city, state: stateName, service_slug: serviceSlug,
+        content, faqs,
+        meta_title, meta_description, og_title, og_description,
+        canonical_url, keywords,
+        path: pagePath
+      } = entry;
+
+      if (!city || !stateName || !serviceSlug) { skipped++; continue; }
+
+      const state    = stateCache[stateName.toLowerCase()];
+      const location = locationCache[`${state?.id}_${city.toLowerCase()}`];
+      const service  = serviceCache[serviceSlug];
+
+      if (!state || !location || !service) {
+        console.warn(`  ⚠️ Skipping entry (missing ref): city=${city}, state=${stateName}, service=${serviceSlug}`);
+        skipped++;
+        continue;
+      }
+
+      slRows.push({
+        service_id:  service.id,
+        location_id: location.id,
+        description: meta_description || null,
+        content:     content || null,
+        faqs:        JSON.stringify(faqs || []),
+      });
+
+      if (pagePath) {
+        seoRows.push({
+          page_path:   pagePath,
+          title:       meta_title || null,
+          description: meta_description || null,
+          keywords:    keywords || null,
+          canonical_url: canonical_url || null,
+          og_title:    og_title || null,
+          og_description: og_description || null,
+        });
+      }
+    }
+
+    console.log(`  ServiceLocation rows: ${slRows.length}, SEO rows: ${seoRows.length}, Skipped: ${skipped}`);
+
+    // ──────────────────────────────────────────────
+    // PHASE 4: Bulk upsert ServiceLocations
+    // ──────────────────────────────────────────────
+    console.log(`\n⬆️  Bulk upserting ${slRows.length} ServiceLocation rows (batch=${BATCH_SIZE})...`);
+    await bulkUpsert(
+      ServiceLocation,
+      slRows,
+      ['service_id', 'location_id'],
+      ['description', 'content', 'faqs', 'updated_at']
+    );
+    console.log('  ✅ ServiceLocations done.');
+
+    // ──────────────────────────────────────────────
+    // PHASE 5: Bulk upsert SEO records
+    // ──────────────────────────────────────────────
+    console.log(`\n⬆️  Bulk upserting ${seoRows.length} SEO rows (batch=${BATCH_SIZE})...`);
+    await bulkUpsert(
+      Seo,
+      seoRows,
+      ['page_path'],
+      ['title', 'description', 'keywords', 'canonical_url', 'og_title', 'og_description', 'updated_at']
+    );
+    console.log('  ✅ SEO records done.');
+
     console.log('\n==================================================');
     console.log('✅ Database Import Completed Successfully!');
-    console.log(`- Entries Processed: ${processedCount}`);
-    console.log(`- Created States: ${createdStatesCount}`);
-    console.log(`- Created Locations/Cities: ${createdLocationsCount}`);
-    console.log(`- Created Services: ${createdServicesCount}`);
-    console.log(`- Created Service-Locations links: ${createdServiceLocationsCount}`);
-    console.log(`- Updated Service-Locations links: ${updatedServiceLocationsCount}`);
-    console.log(`- Created SEO Records: ${createdSeoCount}`);
-    console.log(`- Updated SEO Records: ${updatedSeoCount}`);
+    console.log(`  Entries processed : ${slRows.length + skipped}`);
+    console.log(`  ServiceLocations  : ${slRows.length} upserted`);
+    console.log(`  SEO records       : ${seoRows.length} upserted`);
+    console.log(`  Skipped           : ${skipped}`);
     console.log('==================================================');
 
     process.exit(0);
