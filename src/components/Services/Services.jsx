@@ -85,12 +85,12 @@ const Services = () => {
           if (servicesRes.ok) {
             const servicesJson = await servicesRes.json();
             if (servicesJson.services && Array.isArray(servicesJson.services) && servicesJson.services.length > 0) {
-              cards = servicesJson.services.slice(0, 6).map((srv) => ({
+              cards = servicesJson.services.slice(0, 6).map((srv, i) => ({
                 title: srv.title,
                 desc: srv.short_description || srv.description || '',
                 image: srv.image_url
                   ? (srv.image_url.startsWith('http') ? srv.image_url : `/uploads/${srv.image_url}`)
-                  : 'https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800',
+                  : '/services/' + defaultServices[i].image,
                 slug: srv.slug
               }));
             }
