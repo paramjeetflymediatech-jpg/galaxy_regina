@@ -59,35 +59,55 @@ const Services = () => {
       .replace(/(^-|-$)/g, '');
 
   useEffect(() => {
-    const loadServicesContent = async () => {
+    const loadDynamicServices = async () => {
       try {
-        const response = await fetch('/api/content/page/home');
-        if (!response.ok) return;
+        let pageTitle = servicesSection.title;
+        let pageDesc = servicesSection.description;
 
-        const json = await response.json();
-        if (!json.success || !json.content?.services) return;
+        // 1. Fetch section text (title/description)
+        try {
+          const contentRes = await fetch('/api/content/page/home');
+          if (contentRes.ok) {
+            const contentJson = await contentRes.json();
+            if (contentJson.success && contentJson.content?.services) {
+              pageTitle = contentJson.content.services.title || pageTitle;
+              pageDesc = contentJson.content.services.description || pageDesc;
+            }
+          }
+        } catch (e) {
+          console.error('Error fetching home page services metadata:', e);
+        }
 
-        const servicesData = json.content.services;
-        const cards = servicesData.cards 
-          ? JSON.parse(servicesData.cards) 
-          : defaultServices;
+        // 2. Fetch dynamic active services from database
+        let cards = defaultServices;
+        try {
+          const servicesRes = await fetch('/api/services');
+          if (servicesRes.ok) {
+            const servicesJson = await servicesRes.json();
+            if (servicesJson.services && Array.isArray(servicesJson.services) && servicesJson.services.length > 0) {
+              cards = servicesJson.services.slice(0, 6).map((srv) => ({
+                title: srv.title,
+                desc: srv.short_description || srv.description || '',
+                image: srv.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800',
+                slug: srv.slug
+              }));
+            }
+          }
+        } catch (e) {
+          console.error('Error fetching dynamic services:', e);
+        }
 
         setServicesSection({
-          title: servicesData.title || servicesSection.title,
-          description: servicesData.description || servicesSection.description,
-          cards: Array.isArray(cards) 
-            ? cards.map((card) => ({
-                ...card,
-                slug: card.slug || slugify(card.title || `service-${Date.now()}`)
-              }))
-            : defaultServices
+          title: pageTitle,
+          description: pageDesc,
+          cards: cards
         });
       } catch (error) {
-        console.error('Unable to load services content:', error);
+        console.error('Error loading services data:', error);
       }
     };
 
-    loadServicesContent();
+    loadDynamicServices();
   }, []);
 
   return (
