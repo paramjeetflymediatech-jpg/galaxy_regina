@@ -3,11 +3,13 @@ import { supabase } from './supabase';
 /**
  * Saves a File object from a FormData request to the Supabase Storage bucket.
  * @param file The File object to save
+ * @param folder The folder path prefix (e.g. 'services', 'blogs')
  * @param bucket Name of the Supabase storage bucket (defaults to 'uploads')
  * @returns The public URL of the saved file, or null if no file was uploaded
  */
 export async function saveUploadedFile(
   file: any,
+  folder: string = 'general',
   bucket: string = 'uploads'
 ): Promise<string | null> {
   // Check if a valid file was provided
@@ -19,12 +21,19 @@ export async function saveUploadedFile(
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // Get date prefix (e.g. YYYY/MM/DD)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const datePrefix = `${year}/${month}/${day}`;
+
     // Generate unique filename with original extension
     const dotIndex = file.name.lastIndexOf('.');
     const originalExt = dotIndex !== -1 ? file.name.substring(dotIndex) : '';
     const baseName = dotIndex !== -1 ? file.name.substring(0, dotIndex) : file.name;
     const sanitizedBase = baseName.replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `${Date.now()}-${sanitizedBase}${originalExt}`;
+    const filename = `${datePrefix}/${folder}/${Date.now()}-${sanitizedBase}${originalExt}`;
 
     // Upload to Supabase Storage Bucket
     const { data, error } = await supabase.storage

@@ -76,7 +76,7 @@ export async function PUT(
     }
 
     // Save image if uploaded
-    const image_url = await saveUploadedFile(image);
+    const image_url = await saveUploadedFile(image, 'blogs');
     if (image_url !== null && blog.image_url) {
       await deleteUploadedFile(blog.image_url);
     }

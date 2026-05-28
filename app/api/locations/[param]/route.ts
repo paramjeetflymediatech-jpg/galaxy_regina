@@ -98,7 +98,7 @@ export async function PUT(
     const slug = createSlug(location_name);
     
     // Save image if uploaded
-    const image_url = await saveUploadedFile(image);
+    const image_url = await saveUploadedFile(image, 'locations');
     if (image_url !== null && location.image_url) {
       await deleteUploadedFile(location.image_url);
     }

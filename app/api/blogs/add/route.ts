@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     // Save image if uploaded
-    const image_url = await saveUploadedFile(image);
+    const image_url = await saveUploadedFile(image, 'blogs');
 
     await Blog.create({
       title,

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     let image_url = formData.get('image_url') as string | null;
     if (file) {
-      const savedPath = await saveUploadedFile(file);
+      const savedPath = await saveUploadedFile(file, 'services');
       if (savedPath) image_url = savedPath;
     }
 

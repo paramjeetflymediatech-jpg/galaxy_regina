@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const slug = createSlug(location_name);
     
     // Save image if uploaded
-    const image_url = await saveUploadedFile(image);
+    const image_url = await saveUploadedFile(image, 'locations');
 
     // Replicate ON DUPLICATE KEY UPDATE behavior with explicit find and create/update
     let location = await Location.findOne({ where: { slug } });

@@ -38,7 +38,7 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
     let image_url = service.image_url;
     if (file) {
-      const savedPath = await saveUploadedFile(file);
+      const savedPath = await saveUploadedFile(file, 'services');
       if (savedPath) {
         if (service.image_url) {
           await deleteUploadedFile(service.image_url);
