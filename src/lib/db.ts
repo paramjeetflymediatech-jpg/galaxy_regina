@@ -1,4 +1,6 @@
 import { Sequelize } from 'sequelize';
+// @ts-ignore
+import pg from 'pg';
 
 // Custom global type expansion for Node.js global context to prevent type errors in typescript
 declare global {
@@ -34,6 +36,7 @@ if (databaseUrl) {
   if (isProduction) {
     sequelize = new Sequelize(databaseUrl, {
       dialect: 'postgres',
+      dialectModule: pg,
       logging: false,
       dialectOptions,
       define: { timestamps: true, underscored: true },
@@ -42,6 +45,7 @@ if (databaseUrl) {
     if (!global.sequelize) {
       global.sequelize = new Sequelize(databaseUrl, {
         dialect: 'postgres',
+        dialectModule: pg,
         logging: console.log,
         dialectOptions,
         define: { timestamps: true, underscored: true },
@@ -59,6 +63,7 @@ if (databaseUrl) {
         host: dbHost,
         port: dbPort,
         dialect: 'postgres',
+        dialectModule: pg,
         logging: false,
         dialectOptions,
         define: {
@@ -77,6 +82,7 @@ if (databaseUrl) {
           host: dbHost,
           port: dbPort,
           dialect: 'postgres',
+          dialectModule: pg,
           logging: console.log,
           dialectOptions,
           define: {
