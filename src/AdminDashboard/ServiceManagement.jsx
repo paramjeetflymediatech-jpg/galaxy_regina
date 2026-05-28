@@ -27,6 +27,7 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [image, setImage] = useState(null);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -63,6 +64,7 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
 
   const openNew = () => {
     setForm(emptyForm);
+    setImage(null);
     setEditingId(null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -85,6 +87,7 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
       meta_title: svc.meta_title || '',
       meta_description: svc.meta_description || '',
     });
+    setImage(null);
     setEditingId(svc.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -93,6 +96,7 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
   const closeForm = () => {
     setShowForm(false);
     setEditingId(null);
+    setImage(null);
     setForm(emptyForm);
   };
 
@@ -114,13 +118,29 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
       return;
     }
     setSaving(true);
-    const payload = { ...form, faqs: JSON.stringify(form.faqs || []) };
     try {
+      const data = new FormData();
+      data.append("title", form.title);
+      data.append("slug", form.slug);
+      data.append("short_description", form.short_description || "");
+      data.append("content", form.content || "");
+      data.append("icon", form.icon || "");
+      data.append("image_url", form.image_url || "");
+      data.append("meta_title", form.meta_title || "");
+      data.append("meta_description", form.meta_description || "");
+      data.append("faqs", JSON.stringify(form.faqs || []));
+
+      if (image) {
+        data.append("image", image);
+      }
+
+      const headers = { 'Content-Type': 'multipart/form-data' };
+
       if (editingId) {
-        await axios.put(`/api/admin/services/${editingId}`, payload);
+        await axios.put(`/api/admin/services/${editingId}`, data, { headers });
         toast.success('Service updated successfully');
       } else {
-        await axios.post('/api/admin/services', payload);
+        await axios.post('/api/admin/services', data, { headers });
         toast.success('Service created successfully');
       }
       closeForm();
@@ -205,6 +225,28 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
             <textarea className={inputCls} name="content" value={form.content} onChange={handleChange} rows={6} placeholder="Full service page HTML content..." />
           </div>
 
+          <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">
+            <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+              Service Featured Image
+            </label>
+            {form.image_url && (
+              <div className="mb-1">
+                <p className="text-xs text-gray-500 mb-1">Current Image:</p>
+                <img
+                  src={form.image_url.startsWith('http') ? form.image_url : `/uploads/${form.image_url}`}
+                  alt="Current Service Image"
+                  className="w-32 h-20 object-cover rounded border border-gray-200"
+                />
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files[0])}
+              className="text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 cursor-pointer"
+            />
+          </div>
+
           <div className="flex flex-col gap-4 border-t border-gray-100 pt-6">
             <h3 className="text-lg font-bold text-gray-900">Service FAQ Schema Builder</h3>
             {form.faqs && form.faqs.map((faq, idx) => (
@@ -279,7 +321,17 @@ const ServiceManagement = forwardRef(({ onFormStateChange }, ref) => {
               <tbody>
                 {paginated.map((svc, idx) => (
                   <tr key={svc.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
-                    <td className="py-4 px-6 text-xl">{svc.icon || '⚙️'}</td>
+                    <td className="py-4 px-6">
+                      {svc.image_url ? (
+                        <img
+                          src={svc.image_url.startsWith('http') ? svc.image_url : `/uploads/${svc.image_url}`}
+                          alt={svc.title}
+                          className="w-12 h-10 rounded object-cover border border-gray-200 shrink-0"
+                        />
+                      ) : (
+                        <span className="text-xl">{svc.icon || '⚙️'}</span>
+                      )}
+                    </td>
                     <td className="py-4 px-6 font-semibold text-gray-900">{svc.title}</td>
                     <td className="py-4 px-6">
                       <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-1 rounded">/{svc.slug}</span>

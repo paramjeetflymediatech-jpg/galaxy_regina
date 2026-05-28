@@ -88,7 +88,9 @@ const Services = () => {
               cards = servicesJson.services.slice(0, 6).map((srv) => ({
                 title: srv.title,
                 desc: srv.short_description || srv.description || '',
-                image: srv.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800',
+                image: srv.image_url
+                  ? (srv.image_url.startsWith('http') ? srv.image_url : `/uploads/${srv.image_url}`)
+                  : 'https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800',
                 slug: srv.slug
               }));
             }

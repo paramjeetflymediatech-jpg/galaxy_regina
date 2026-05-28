@@ -11,18 +11,41 @@ export async function GET() {
   }
 }
 
+import { saveUploadedFile } from '@/src/lib/uploadHelper';
+
 // CREATE SERVICE
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { title, slug, short_description, content, icon, image_url, meta_title, meta_description } = body;
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+    const slug = formData.get('slug') as string;
+    const short_description = formData.get('short_description') as string | null;
+    const content = formData.get('content') as string | null;
+    const icon = formData.get('icon') as string | null;
+    const meta_title = formData.get('meta_title') as string | null;
+    const meta_description = formData.get('meta_description') as string | null;
+    const file = formData.get('image');
 
     if (!title || !slug) {
       return NextResponse.json({ success: false, message: 'Title and slug are required' }, { status: 400 });
     }
 
+    let image_url = formData.get('image_url') as string | null;
+    if (file) {
+      const savedPath = await saveUploadedFile(file);
+      if (savedPath) image_url = savedPath;
+    }
+
     const service = await Service.create({
-      title, slug, short_description, content, icon, image_url, meta_title, meta_description, is_active: true,
+      title,
+      slug,
+      short_description,
+      content,
+      icon,
+      image_url,
+      meta_title,
+      meta_description,
+      is_active: true,
     });
 
     return NextResponse.json({ success: true, message: 'Service created successfully', service }, { status: 201 });

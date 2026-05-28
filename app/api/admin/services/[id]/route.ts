@@ -13,6 +13,8 @@ export async function GET(_req: Request, context: { params: Promise<{ id: string
   }
 }
 
+import { saveUploadedFile } from '@/src/lib/uploadHelper';
+
 // UPDATE
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -20,8 +22,37 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const service = await Service.findByPk(id);
     if (!service) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
 
-    const body = await request.json();
-    await service.update(body);
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+    const slug = formData.get('slug') as string;
+    const short_description = formData.get('short_description') as string | null;
+    const content = formData.get('content') as string | null;
+    const icon = formData.get('icon') as string | null;
+    const meta_title = formData.get('meta_title') as string | null;
+    const meta_description = formData.get('meta_description') as string | null;
+    const file = formData.get('image');
+
+    if (!title || !slug) {
+      return NextResponse.json({ success: false, message: 'Title and slug are required' }, { status: 400 });
+    }
+
+    let image_url = service.image_url;
+    if (file) {
+      const savedPath = await saveUploadedFile(file);
+      if (savedPath) image_url = savedPath;
+    }
+
+    await service.update({
+      title,
+      slug,
+      short_description,
+      content,
+      icon,
+      image_url,
+      meta_title,
+      meta_description,
+    });
+
     return NextResponse.json({ success: true, message: 'Service updated successfully', service });
   } catch (error: any) {
     return NextResponse.json({ success: false, message: 'Failed to update service', error: error.message }, { status: 500 });
