@@ -43,6 +43,9 @@ const RecentWork = () => {
       <div className="container">
         <h2 className="main-title">MOVING WORK RECENTLY COMPLETED</h2>
         <h3 className="sub-title">TRUST GALAXY MOVERS REGINA, SK</h3>
+        <p className="work-desc" style={{ textAlign: 'center', maxWidth: '800px', margin: '15px auto 30px', color: '#666', lineHeight: '1.6', fontSize: '1.1rem' }}>
+          Galaxy Movers Regina has recently completed home moves, apartment relocations, office shifting, furniture moving, and long distance moving projects across Regina, SK. Our team continues to earn customer trust by delivering careful handling, reliable scheduling, professional support, and stress-free moving services for every relocation.
+        </p>
 
         <div className="slider-container">
           <button className="slider-btn prev" onClick={prevSlide}>←</button>

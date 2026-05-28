@@ -13,7 +13,12 @@ const dbPassword = process.env.DB_PASSWORD;
 const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306;
 
-const databaseUrl = process.env.DATABASE_URL;
+function sanitizeDatabaseUrl(url: string | undefined): string | undefined {
+  if (!url) return url;
+  return url.replace(/\\%/g, '%');
+}
+
+const databaseUrl = sanitizeDatabaseUrl(process.env.DATABASE_URL);
 
 if (!databaseUrl && (!dbName || !dbUser)) {
   // If variables aren't loaded yet (e.g. at compile time), we still want to avoid crashing

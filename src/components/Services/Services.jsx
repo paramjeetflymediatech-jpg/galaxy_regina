@@ -6,36 +6,47 @@ import './Services.css';
 
 const defaultServices = [
   {
-    title: "HOUSE MOVERS",
-    desc: "Galaxy movers offer reliable and easy house moving services customized to your needs.",
-    image: "https://galaxymoversregina.ca/wp-content/uploads/2025/08/House-Movers.jpg",
-    detail: 'Our house moving service includes packing, loading, transport, unloading and setup...',
-    slug: 'house-movers'
+    title: "Local Moving",
+    desc: "Our local movers in Regina help you relocate homes, apartments, condos, and small offices safely within the city and nearby areas.",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800",
+    slug: 'local-moving'
   },
   {
-    title: "CONDO & APARTMENT MOVERS",
-    desc: "Specialized in narrow spaces, elevators & tight access. Safe and efficient condo moving.",
-    image: "https://galaxymoversregina.ca/wp-content/uploads/2025/08/Condo-Apartment-Movers.jpg",
-    slug: 'condo-apartment-movers'
+    title: "Long Distance Moving",
+    desc: "We provide reliable long distance moving services from Regina to other cities with safe transport, careful planning, and timely delivery.",
+    image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800",
+    slug: 'long-distance-moving'
   },
   {
-    title: "COMMERCIAL & OFFICE MOVERS",
-    desc: "Expert office relocation with minimal downtime.",
-    image: "https://galaxymoversregina.ca/wp-content/uploads/2025/08/Commercial-Office-Movers.jpg",
-    slug: 'commercial-office-movers'
+    title: "Residential Moving",
+    desc: "Move your home with confidence. We handle furniture, appliances, boxes, and personal items carefully for a stress-free residential relocation.",
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
+    slug: 'residential-moving'
   },
   {
-    title: "LONG DISTANCE MOVERS",
-    desc: "Safe and reliable long-distance moving across Canada.",
-    image: "https://galaxymoversregina.ca/wp-content/uploads/2025/08/Long-Distance-Moving-Regina.jpg",
-    slug: 'long-distance-movers'
+    title: "Commercial Moving",
+    desc: "Our commercial movers support office, shop, and business relocations with organized planning, safe equipment handling, and minimal business interruption.",
+    image: "https://images.unsplash.com/photo-1622290291469-4f5f8c2e1b3e?w=800",
+    slug: 'commercial-moving'
+  },
+  {
+    title: "Packing Services",
+    desc: "We offer professional packing services using proper materials to protect fragile items, furniture, electronics, kitchenware, and valuable belongings.",
+    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800",
+    slug: 'packing-services'
+  },
+  {
+    title: "Storage Solutions",
+    desc: "Need extra space during your move? Our storage solutions help keep your items safe, organized, and accessible when required.",
+    image: "https://images.unsplash.com/photo-1565538810844-1e1194826c94?w=800",
+    slug: 'storage-solutions'
   },
 ];
 
 const Services = () => {
   const [servicesSection, setServicesSection] = useState({
     title: 'LOCAL AND LONG DISTANCE MOVING & STORAGE COMPANY',
-    description: 'Since 2012, Galaxy Movers Regina earned customer’s trust and became the best moving and storage solutions company.',
+    description: 'Galaxy Movers Regina is a local and long distance moving and storage company serving Regina, SK, and surrounding communities. From packing and loading to transportation, unloading, and storage solutions, our professional movers help make your residential or commercial move simple, secure, and well-organized.',
     cards: defaultServices
   });
 

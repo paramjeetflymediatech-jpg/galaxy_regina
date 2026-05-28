@@ -4,34 +4,34 @@ import './WhyUs.css';
 const WhyUs = () => {
   const features = [
     {
-      icon: "📋",
-      title: "Transparent Fees",
-      desc: "We believe in honesty. So, we provide the upfront clear quote to the customer before starting the work. Our transparent pricing schema ensures the fair charges without any additional amount."
+      icon: "🛡️",
+      title: "Careful Handling",
+      desc: "Your belongings matter to us. Our movers use safe lifting, wrapping, packing, and loading methods to protect your items throughout the complete moving process."
     },
     {
-      icon: "🔒",
-      title: "Security",
-      desc: "Moving can be tough but not with Galaxy Movers Regina. We are known for our safe transit. Your belongings are protected by our skilled team and modern vehicles."
-    },
-    {
-      icon: "🕒",
-      title: "24/7 Support",
-      desc: "Our focus is on customer satisfaction. We offer 24/7 support to answer your queries or any urgencies. After-move support is also available."
-    },
-    {
-      icon: "🏷️",
-      title: "Price-Match Quotes",
-      desc: "With our price-match policy, we offer the best rate. If you find a lower price, we will match it. No compromise with quality."
-    },
-    {
-      icon: "👷‍♂️",
-      title: "Moving Specialists",
-      desc: "Galaxy Movers Regina assigns specialists who are thoroughly trained and verified. They handle every type of move with expertise."
+      icon: "⏱️",
+      title: "Timely Delivery",
+      desc: "We value your schedule and work hard to complete every move on time. Our Regina movers focus on punctual pickup, transport, and delivery."
     },
     {
       icon: "📍",
-      title: "Moving Day Preparation",
-      desc: "We offer packing, assembling, labelling, and loading. Step-by-step guidance and a unique checklist based on your needs."
+      title: "Local Knowledge",
+      desc: "As Regina movers, we understand local routes, neighborhoods, building access, and moving needs, helping us complete your move more smoothly and efficiently."
+    },
+    {
+      icon: "💰",
+      title: "Budget Friendly",
+      desc: "Galaxy Movers Regina offers affordable moving services without compromising safety or quality, making professional moving support accessible for homes and businesses."
+    },
+    {
+      icon: "📦",
+      title: "Complete Support",
+      desc: "From packing to moving and storage, we provide complete relocation support so you do not have to manage multiple moving service providers."
+    },
+    {
+      icon: "🤝",
+      title: "Trusted Service",
+      desc: "Customers choose us for our honesty, professionalism, friendly approach, and commitment to making every move smooth, secure, and stress-free."
     }
   ];
 
@@ -43,7 +43,7 @@ const WhyUs = () => {
             Why Move With <span className="highlight">Galaxy Movers Regina?</span>
           </h2>
           <p className="section-subtitle">
-            Experience the difference with professional, reliable and customer-focused moving services.
+            Choosing Galaxy Movers Regina means choosing a dependable moving company in Regina that understands your relocation needs. Whether it is a local move, long distance move, office move, packing service, or storage requirement, we deliver professional support, careful handling, and a smooth moving experience.
           </p>
         </div>
 

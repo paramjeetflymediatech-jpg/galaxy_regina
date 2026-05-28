@@ -9,10 +9,10 @@ const Trusted = () => {
         <div className="trusted-overlay">
           <div className="trusted-content">
             <h1 className="trusted-title">
-              Your 100% Trusted Moving Company in Regina
+              Professional Moving Company in Regina, SK
             </h1>
-            <p className="trusted-subtitle">
-              Reliable • Safe • Stress-Free
+            <p className="trusted-subtitle" style={{ maxWidth: '800px', margin: '20px auto 35px', textTransform: 'none', fontSize: '1.2rem', lineHeight: '1.6' }}>
+              Galaxy Movers Regina provides dependable moving services for families, students, homeowners, renters, and businesses across Regina and nearby areas. As a trusted moving company in Regina, we focus on safe handling, timely service, affordable pricing, and a smooth relocation experience for every customer.
             </p>
 
             <div className="trusted-buttons">
@@ -32,10 +32,10 @@ const Trusted = () => {
           
           <div className="trust-grid">
             {[
-              { number: "15+", label: "Years of Experience" },
-              { number: "4.9+", label: "Reviews" },
-              { number: "7,509+", label: "Moves Completed" },
-              { number: "55+", label: "Experiences Staff" },
+              { number: "1,000+", label: "Successful Moves Completed" },
+              { number: "100%", label: "Customer-Focused Moving Service" },
+              { number: "7 Days", label: "Flexible Moving Availability" },
+              { number: "Local & Long Distance", label: "Moving Solutions Available" },
             ].map((item, index) => (
               <div key={index} className="trust-card">
                 <h3 className="trust-number">{item.number}</h3>

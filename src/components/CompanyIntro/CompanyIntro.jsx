@@ -21,17 +21,24 @@ const CompanyIntro = () => {
             <h2 className="intro-title">
               Why Choose Galaxy Movers Regina?
             </h2>
+            <h3 className="intro-subtitle" style={{ fontSize: '1.4rem', color: '#ef4444', fontWeight: '700', marginBottom: '20px' }}>
+              Your Trusted Moving Partner in Regina, SK
+            </h3>
             
             <p className="intro-text">
-              Galaxy Movers Regina is one of the full service moving company in Regina having over a decade of experience under our belt. Besides this, we offer a number of customizable moving options when it comes to residential, business and long distance relocation. 
+              Galaxy Movers Regina is a professional moving company in Regina, SK, dedicated to making every relocation easier for homeowners, renters, families, students, and businesses. Moving can be stressful, but with the right team, it becomes simple, organized, and manageable. That is why our experienced movers focus on careful handling, clear communication, timely service, and customer satisfaction from the first call to the final delivery.
             </p>
             
             <p className="intro-text">
-              In addition, we offer round the clock service to our customers to resolve any kind of problem that they might be facing. We truly stand out from the organizations in this location.
+              We provide a complete range of moving services in Regina, including local moving, long distance moving, residential moving, commercial moving, packing services, furniture moving, apartment moving, office relocation, and storage solutions. Whether you are moving across the street, across Regina, or to another city, our team plans every step with attention to detail.
             </p>
             
             <p className="intro-text">
-              We as movers in Regina offer our customers transparent pricing without any kind of hidden Fees while offering top notch services.
+              As one of the trusted movers in Regina, Galaxy Movers Regina understands the importance of protecting your belongings. We handle furniture, appliances, boxes, fragile items, and office equipment with proper care. Our moving process is designed to save your time, reduce stress, and give you confidence throughout your relocation.
+            </p>
+
+            <p className="intro-text">
+              When you choose Galaxy Movers Regina, you choose a reliable moving company that values honesty, professionalism, affordability, and safe moving service.
             </p>
 
             <button className="view-more-btn">

@@ -5,18 +5,18 @@ const WhyChooseUs = () => {
   const steps = [
     {
       number: "1",
-      title: "BOOK ONLINE",
-      desc: "Your moving journey can get started with just a call. Fill an online form, which gives us an idea of your requirements so answer all the queries. Our team will inform all available service options, timing and prices that fit your needs. So, allow us to reduce your burden from the first step."
+      title: "Professional Movers",
+      desc: "Our professional movers in Regina are trained to handle homes, apartments, offices, furniture, fragile items, and long distance relocations with care. We work with proper planning, safe moving methods, and a customer-first approach to make your relocation smooth and secure."
     },
     {
       number: "2",
-      title: "CONFIRM BOOKING",
-      desc: "Once you decide your moving options then confirm the booking as soon as possible. We will email you with the complete document including all moving details like date, time, and selected service. All preparations will be done in advance for smooth relocation."
+      title: "Honest Pricing",
+      desc: "Galaxy Movers Regina believes in fair and transparent moving rates. We aim to provide affordable moving services in Regina without compromising quality. Our pricing approach helps customers plan their move confidently without worrying about unnecessary hidden charges or confusion."
     },
     {
       number: "3",
-      title: "MEET THE MOVERS",
-      desc: "Our skilled team is punctual. They arrive timely with the required tools and logistics on the decided date. After analyzing the complete plan, they will start execution. The team is capable of handling your stuff with top care and attention to transport everything safely."
+      title: "Complete Moving",
+      desc: "From packing and loading to transportation, unloading, and storage, we offer complete moving solutions in Regina. Whether you need local movers, long distance movers, residential movers, or commercial movers, our team is ready to support your move from beginning to end."
     }
   ];
 

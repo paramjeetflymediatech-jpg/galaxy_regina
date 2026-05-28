@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="footer-column">
           <h3 className="footer-heading">Moving Services</h3>
           <p className="footer-text">
-            We offer professional moving services tailored to meet the unique needs of individuals, families, and businesses across Saskatchewan. From local moves to long-distance relocations, our skilled team ensures your possessions are handled with care, precision, and respect.
+            Galaxy Movers Regina provides reliable local moving, long distance moving, packing, storage, residential moving, and commercial relocation services across Regina, SK, with professional care and trusted support.
           </p>
           
           {/* Font Awesome Social Icons */}
