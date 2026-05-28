@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "eslint",
     "migrate": "npx tsx migrate.ts",
     "create-admin": "npx tsx create-admin.js"
