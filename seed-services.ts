@@ -34,5 +34,4 @@ async function seedServices() {
     process.exit(1);
   }
 }
-
-seedServices();
+ 

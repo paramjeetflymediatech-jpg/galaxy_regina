@@ -23,7 +23,7 @@ function sanitizeDatabaseUrl(url: string | undefined): string | undefined {
 }
 
 const databaseUrl = sanitizeDatabaseUrl(process.env.DATABASE_URL);
-console.log(databaseUrl,'irl')
+
 if (!databaseUrl && (!dbName || !dbUser)) {
   // If variables aren't loaded yet (e.g. at compile time), we still want to avoid crashing
   // But we will print a warning. In runtime they must be loaded.

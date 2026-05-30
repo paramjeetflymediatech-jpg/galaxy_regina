@@ -61,8 +61,7 @@ async function getGlobalScripts() {
         header: scripts.header || '',
         footer: scripts.footer || ''
       };
-      console.log("✅ Auto-migrated global scripts from site_contents table to Seo table.");
-      return scripts;
+    
     }
   } catch (error) {
     console.error("❌ Failed to load global header/footer scripts from Seo table:", error);
@@ -107,9 +106,7 @@ export default async function RootLayout({
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const seoRecord = await getPageSpecificSeo(pathname);
-  console.log(seoRecord,'resssfsdfdsfdsf',pathname)
-  console.log(globalFooter,'globalFooter',globalHeader)
-
+ 
   // Parse page-specific FAQs and build the JSON-LD FAQ schema markup
   let faqSchema = null;
   if (seoRecord?.faqs) {

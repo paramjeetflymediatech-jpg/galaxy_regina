@@ -74,8 +74,7 @@ const MovingCompanyWebsite = () => {
             setLoading(false);
         }
     };
-    console.log(serviceData);
-    // console.log(locationData);
+ 
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -96,9 +95,6 @@ const MovingCompanyWebsite = () => {
     const displayContent = locationData.service_location_content || serviceData?.content || locationData.content || '<p>Details are currently being updated.</p>';
     const displaySubtitle = locationData.service_location_description || serviceData?.description || locationData.hero_subtitle || `Trust Galaxy Movers for secure, professional transport. Your precious items are safe with our Local Moving Company in ${locName}.`;
 
-    console.log(locationData,'locationData')
-    console.log(serviceData,'servie Data')
-    console.log(displayContent,'displayContent')
     let parsedServiceFaqs = null;
     if (serviceData?.faqs) {
         try {

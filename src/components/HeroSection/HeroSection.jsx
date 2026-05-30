@@ -33,8 +33,6 @@ const Home = () => {
 
       alert('Quote Submitted Successfully');
 
-      console.log(response.data);
-
       setFormData({
         full_name: '',
         email: '',
