@@ -93,7 +93,7 @@ const MovingCompanyWebsite = () => {
     // Try to parse service name from serviceData, hero_title or default
     const titleText = serviceData?.title || locationData.hero_title || "Moving Services";
     const locName = locationData.location_name || "Canada";
-    const displayContent =  serviceData?.content || locationData.content || '<p>Details are currently being updated.</p>';
+    const displayContent = locationData.service_location_content || serviceData?.content || locationData.content || '<p>Details are currently being updated.</p>';
     const displaySubtitle = locationData.service_location_description || serviceData?.description || locationData.hero_subtitle || `Trust Galaxy Movers for secure, professional transport. Your precious items are safe with our Local Moving Company in ${locName}.`;
 
     console.log(locationData,'locationData')

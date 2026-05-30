@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Location, Service } from '@/src/lib/models';
+import { Location, Service, ServiceLocation } from '@/src/lib/models';
 import { saveUploadedFile, deleteUploadedFile } from '@/src/lib/uploadHelper';
 
 type Params = {
@@ -27,15 +27,7 @@ export async function GET(
     // Check if the param is a numeric ID or a string slug
     const isNumeric = /^\d+$/.test(param);
     const location = await Location.findOne({
-      where: isNumeric ? { id: parseInt(param, 10) } : { slug: param },
-      include: serviceSlug ? [
-        {
-          model: Service,
-          where: { slug: serviceSlug },
-          required: false,
-          through: { attributes: ['content', 'faqs', 'description'] }
-        }
-      ] : []
+      where: isNumeric ? { id: parseInt(param, 10) } : { slug: param }
     });
 
     if (!location) {
@@ -45,9 +37,37 @@ export async function GET(
       );
     }
 
+    const locationJson = location.toJSON();
+
+    if (serviceSlug) {
+      const service = await Service.findOne({ where: { slug: serviceSlug } });
+      if (service) {
+        const serviceLocation = await ServiceLocation.findOne({
+          where: {
+            location_id: location.id,
+            service_id: service.id
+          }
+        });
+
+        const serviceJson = service.toJSON();
+        if (serviceLocation) {
+          serviceJson.ServiceLocation = {
+            id: serviceLocation.id,
+            content: serviceLocation.content,
+            faqs: serviceLocation.faqs,
+            description: serviceLocation.description
+          };
+        }
+
+        locationJson.Services = [serviceJson];
+      } else {
+        locationJson.Services = [];
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      location,
+      location: locationJson,
     });
   } catch (error: any) {
     console.error('Error fetching location:', error);
