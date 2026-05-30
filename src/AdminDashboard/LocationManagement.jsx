@@ -38,7 +38,16 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
     const [services, setServices] = useState([]);
     const [serviceLocationForm, setServiceLocationForm] = useState({
         id: null, service_id: '', location_id: '', content: '', description: '',
-        faqs: [{ q: '', a: '' }]
+        faqs: [{ q: '', a: '' }],
+        meta_title: '',
+        meta_description: '',
+        meta_keywords: '',
+        canonical_url: '',
+        og_title: '',
+        og_description: '',
+        og_image: '',
+        header_scripts: '',
+        footer_scripts: '',
     });
 
     useEffect(() => {
@@ -232,6 +241,32 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
                 await axios.post('/api/service-locations', payload);
                 toast.success("Service Location Added!");
             }
+
+            // Save SEO data to the Seo table
+            const service = services.find(s => s.id === parseInt(service_id, 10));
+            const location = locations.find(l => l.id === parseInt(location_id, 10));
+            if (service && location) {
+                const page_path = `/location/${service.slug}-in-${location.slug}`;
+                const seoPayload = {
+                    page_path,
+                    title: serviceLocationForm.meta_title || '',
+                    description: serviceLocationForm.meta_description || '',
+                    keywords: serviceLocationForm.meta_keywords || '',
+                    canonical_url: serviceLocationForm.canonical_url || '',
+                    og_title: serviceLocationForm.og_title || '',
+                    og_description: serviceLocationForm.og_description || '',
+                    og_image: serviceLocationForm.og_image || '',
+                    header_scripts: serviceLocationForm.header_scripts || '',
+                    footer_scripts: serviceLocationForm.footer_scripts || '',
+                    faqs: cleanFaqs
+                };
+                try {
+                    await axios.post('/api/admin/seo', seoPayload);
+                } catch (seoErr) {
+                    console.error("Failed to save SEO metadata:", seoErr);
+                }
+            }
+
             setShowForm(false);
             fetchServiceLocations();
         } catch (error) {
@@ -246,13 +281,22 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
             location_id: '',
             content: '',
             description: '',
-            faqs: [{ q: '', a: '' }]
+            faqs: [{ q: '', a: '' }],
+            meta_title: '',
+            meta_description: '',
+            meta_keywords: '',
+            canonical_url: '',
+            og_title: '',
+            og_description: '',
+            og_image: '',
+            header_scripts: '',
+            footer_scripts: '',
         });
         setEditing(false);
         setShowForm(true);
     };
 
-    const editServiceLocationHandler = (sl) => {
+    const editServiceLocationHandler = async (sl) => {
         let parsedFaqs = [{ q: '', a: '' }];
         if (sl.faqs) {
             try {
@@ -265,17 +309,59 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
             }
         }
 
-        setServiceLocationForm({
+        const initialForm = {
             id: sl.id,
             service_id: sl.service_id || '',
             location_id: sl.location_id || '',
             content: sl.content || '',
             description: sl.description || '',
-            faqs: parsedFaqs
-        });
+            faqs: parsedFaqs,
+            meta_title: '',
+            meta_description: '',
+            meta_keywords: '',
+            canonical_url: '',
+            og_title: '',
+            og_description: '',
+            og_image: '',
+            header_scripts: '',
+            footer_scripts: '',
+        };
+
+        setServiceLocationForm(initialForm);
         setEditing(true);
         setShowForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Load SEO data from API asynchronously
+        const service = services.find(s => s.id === sl.service_id);
+        const location = locations.find(l => l.id === sl.location_id);
+        if (service && location) {
+            const page_path = `/location/${service.slug}-in-${location.slug}`;
+            try {
+                const seoRes = await axios.get(`/api/admin/seo?page_path=${encodeURIComponent(page_path)}`);
+                if (seoRes.data.success && seoRes.data.seo) {
+                    const seo = seoRes.data.seo;
+                    setServiceLocationForm(prev => {
+                        // Avoid updating if user edited a different item during query
+                        if (prev.id !== sl.id) return prev;
+                        return {
+                            ...prev,
+                            meta_title: seo.title || '',
+                            meta_description: seo.description || '',
+                            meta_keywords: seo.keywords || '',
+                            canonical_url: seo.canonical_url || '',
+                            og_title: seo.og_title || '',
+                            og_description: seo.og_description || '',
+                            og_image: seo.og_image || '',
+                            header_scripts: seo.header_scripts || '',
+                            footer_scripts: seo.footer_scripts || '',
+                        };
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load SEO metadata for service location:", err);
+            }
+        }
     };
 
     const deleteServiceLocation = async (id) => {
@@ -694,6 +780,54 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
                                                 )}
                                             </div>
                                         ))}
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-gray-200 pt-6 mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">SEO Metadata Customizer</h3>
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-gray-900">Meta Title Tag</label>
+                                            <input type="text" name="meta_title" placeholder="Meta Title..." value={serviceLocationForm.meta_title} onChange={handleServiceLocationChange} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-gray-900">Meta Description</label>
+                                            <textarea name="meta_description" placeholder="Meta Description..." value={serviceLocationForm.meta_description} onChange={handleServiceLocationChange} rows={3} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full resize-y focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-gray-900">Meta Keywords (comma separated)</label>
+                                            <input type="text" name="meta_keywords" placeholder="Keywords..." value={serviceLocationForm.meta_keywords} onChange={handleServiceLocationChange} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold text-gray-900">Canonical URL</label>
+                                            <input type="text" name="canonical_url" placeholder="https://example.com/..." value={serviceLocationForm.canonical_url} onChange={handleServiceLocationChange} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
+
+                                        <h4 className="text-sm font-bold text-gray-900 mt-2">OpenGraph Social Meta</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-xs font-semibold text-gray-700">OG Title</label>
+                                                <input type="text" name="og_title" placeholder="OG Title..." value={serviceLocationForm.og_title} onChange={handleServiceLocationChange} className="border border-gray-300 p-2.5 text-xs outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-xs font-semibold text-gray-700">OG Image URL</label>
+                                                <input type="text" name="og_image" placeholder="OG Image URL..." value={serviceLocationForm.og_image} onChange={handleServiceLocationChange} className="border border-gray-300 p-2.5 text-xs outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-xs font-semibold text-gray-700">OG Description</label>
+                                            <textarea name="og_description" placeholder="OG Description..." value={serviceLocationForm.og_description} onChange={handleServiceLocationChange} rows={2} className="border border-gray-300 p-2.5 text-xs outline-none bg-white w-full resize-y focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
+
+                                        <h4 className="text-sm font-bold text-gray-900 mt-2">Analytics & Injection Scripts</h4>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-xs font-semibold text-gray-700">Header Scripts (inside &lt;head&gt;)</label>
+                                            <textarea name="header_scripts" placeholder="Header Injection..." value={serviceLocationForm.header_scripts} onChange={handleServiceLocationChange} rows={3} className="border border-gray-300 p-2.5 text-xs font-mono outline-none bg-white w-full resize-y focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-xs font-semibold text-gray-700">Footer Scripts (before closing &lt;/body&gt;)</label>
+                                            <textarea name="footer_scripts" placeholder="Footer Injection..." value={serviceLocationForm.footer_scripts} onChange={handleServiceLocationChange} rows={3} className="border border-gray-300 p-2.5 text-xs font-mono outline-none bg-white w-full resize-y focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                        </div>
                                     </div>
                                 </div>
 

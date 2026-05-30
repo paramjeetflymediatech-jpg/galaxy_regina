@@ -14,7 +14,25 @@ import BlogManagement from '@/src/AdminDashboard/BlogManagement';
 import ServiceManagement from '@/src/AdminDashboard/ServiceManagement';
 import AdminSidebar from '@/src/AdminDashboard/AdminSidebar';
 
+const standardPages = [
+    { id: 'home', path: '/', label: 'Home Page' },
+    { id: 'about', path: '/about', label: 'About Page' },
+    { id: 'faq', path: '/faqs', label: 'FAQ Page' },
+    { id: 'blogs', path: '/blogs', label: 'Blogs List Page' },
+    { id: 'house-moving', path: '/house-moving', label: 'House Moving Page' },
+    { id: 'manpower', path: '/manpower', label: 'Manpower Page' },
+    { id: 'storage-services', path: '/StorageServices', label: 'Storage Services Page' },
+    { id: 'insurance', path: '/Insurance', label: 'Insurance Page' },
+    { id: 'license', path: '/License', label: 'License Page' },
+    { id: 'licensee', path: '/licensee', label: 'Licensee Page' },
+    { id: 'insurance-policy-claims', path: '/insurance-and-policy-claims', label: 'Insurance Policy Claims Page' }
+];
 
+const getPagePath = (id) => {
+    if (id === 'global-scripts') return 'global';
+    const found = standardPages.find(p => p.id === id);
+    return found ? found.path : id;
+};
 
 const AdminDashboardContent = () => {
     const router = useRouter();
@@ -78,9 +96,73 @@ const AdminDashboardContent = () => {
         title: '',
         description: '',
         keywords: '',
+        canonical_url: '',
+        og_title: '',
+        og_description: '',
+        og_image: '',
         header: '',
         footer: '',
+        faqs: [],
     });
+
+    const [customSeoPages, setCustomSeoPages] = useState([]);
+
+    const fetchSeoPages = async () => {
+        try {
+            const res = await axios.get('/api/admin/seo');
+            if (res.data.success && res.data.seos) {
+                setCustomSeoPages(res.data.seos);
+            }
+        } catch (error) {
+            console.error('Failed to fetch SEO pages', error);
+        }
+    };
+
+    const getMergedSeoPages = () => {
+        const list = [
+            { id: 'global-scripts', path: 'global', label: 'Global Scripts (Header & Footer)', isStandard: true },
+            ...standardPages.map(p => ({ ...p, isStandard: true }))
+        ];
+        const seenPaths = new Set(list.map(p => p.path));
+
+        customSeoPages.forEach(seo => {
+            if (seo.page_path === 'global') return;
+            if (!seenPaths.has(seo.page_path)) {
+                list.push({
+                    id: seo.page_path,
+                    path: seo.page_path,
+                    label: `Custom Page: ${seo.page_path}`,
+                    isStandard: false
+                });
+            }
+        });
+        return list;
+    };
+
+
+    // Helper handlers for seoManagerForm FAQs
+    const addSeoManagerFaq = () => {
+        setSeoManagerForm(prev => ({
+            ...prev,
+            faqs: [...(prev.faqs || []), { q: '', a: '' }]
+        }));
+    };
+    const updateSeoManagerFaq = (index, field, value) => {
+        const newFaqs = [...(seoManagerForm.faqs || [])];
+        newFaqs[index][field] = value;
+        setSeoManagerForm(prev => ({
+            ...prev,
+            faqs: newFaqs
+        }));
+    };
+    const removeSeoManagerFaq = (index) => {
+        const newFaqs = [...(seoManagerForm.faqs || [])];
+        newFaqs.splice(index, 1);
+        setSeoManagerForm(prev => ({
+            ...prev,
+            faqs: newFaqs
+        }));
+    };
 
     const [saving, setSaving] = useState(false);
 
@@ -103,6 +185,7 @@ const AdminDashboardContent = () => {
 
         setLoading(false);
         loadPageContent();
+        fetchSeoPages();
     }, [router]);
 
     const loadPageContent = async () => {
@@ -266,28 +349,108 @@ const AdminDashboardContent = () => {
 
 
     // LOAD PAGE SEO
-    const loadPageSeo = async (page) => {
+    const loadPageSeo = async (pageId) => {
         try {
-            const pageName = page === 'global-scripts' ? 'global' : page;
-            const res = await axios.get(`/api/content/page/${pageName}`);
-            if (res.data.success) {
-                if (page === 'global-scripts') {
-                    const scripts = res.data.content?.scripts || {};
+            if (pageId === 'global-scripts') {
+                const res = await axios.get('/api/admin/seo?page_path=global');
+                if (res.data.success && res.data.seo) {
+                    const seo = res.data.seo;
                     setSeoManagerForm({
                         title: '',
                         description: '',
                         keywords: '',
-                        header: scripts.header || '',
-                        footer: scripts.footer || '',
+                        canonical_url: '',
+                        og_title: '',
+                        og_description: '',
+                        og_image: '',
+                        header: seo.header_scripts || '',
+                        footer: seo.footer_scripts || '',
+                        faqs: [],
                     });
                 } else {
-                    const seo = res.data.content?.seo || {};
+                    const fallbackRes = await axios.get('/api/content/page/global');
+                    if (fallbackRes.data.success) {
+                        const scripts = fallbackRes.data.content?.scripts || {};
+                        setSeoManagerForm({
+                            title: '',
+                            description: '',
+                            keywords: '',
+                            canonical_url: '',
+                            og_title: '',
+                            og_description: '',
+                            og_image: '',
+                            header: scripts.header || '',
+                            footer: scripts.footer || '',
+                            faqs: [],
+                        });
+                    }
+                }
+                return;
+            }
+
+            const path = getPagePath(pageId);
+            const res = await axios.get(`/api/admin/seo?page_path=${encodeURIComponent(path)}`);
+            if (res.data.success && res.data.seo) {
+                const seo = res.data.seo;
+                let parsedFaqs = [];
+                if (seo.faqs) {
+                    try {
+                        parsedFaqs = typeof seo.faqs === 'string' ? JSON.parse(seo.faqs) : seo.faqs;
+                    } catch (e) {
+                        parsedFaqs = [];
+                    }
+                }
+                setSeoManagerForm({
+                    title: seo.title || '',
+                    description: seo.description || '',
+                    keywords: seo.keywords || '',
+                    canonical_url: seo.canonical_url || '',
+                    og_title: seo.og_title || '',
+                    og_description: seo.og_description || '',
+                    og_image: seo.og_image || '',
+                    header: seo.header_scripts || '',
+                    footer: seo.footer_scripts || '',
+                    faqs: Array.isArray(parsedFaqs) ? parsedFaqs : [],
+                });
+            } else {
+                const standardPage = standardPages.find(p => p.id === pageId);
+                if (standardPage) {
+                    const fallbackRes = await axios.get(`/api/content/page/${pageId}`);
+                    if (fallbackRes.data.success) {
+                        const seo = fallbackRes.data.content?.seo || {};
+                        let parsedFaqs = [];
+                        if (seo.faqs) {
+                            try {
+                                parsedFaqs = typeof seo.faqs === 'string' ? JSON.parse(seo.faqs) : seo.faqs;
+                            } catch (e) {
+                                parsedFaqs = [];
+                            }
+                        }
+                        setSeoManagerForm({
+                            title: seo.title || '',
+                            description: seo.description || '',
+                            keywords: seo.keywords || '',
+                            canonical_url: '',
+                            og_title: '',
+                            og_description: '',
+                            og_image: '',
+                            header: '',
+                            footer: '',
+                            faqs: Array.isArray(parsedFaqs) ? parsedFaqs : [],
+                        });
+                    }
+                } else {
                     setSeoManagerForm({
-                        title: seo.title || '',
-                        description: seo.description || '',
-                        keywords: seo.keywords || '',
+                        title: '',
+                        description: '',
+                        keywords: '',
+                        canonical_url: '',
+                        og_title: '',
+                        og_description: '',
+                        og_image: '',
                         header: '',
                         footer: '',
+                        faqs: [],
                     });
                 }
             }
@@ -313,13 +476,35 @@ const AdminDashboardContent = () => {
                 });
                 toast.success('Global scripts saved successfully');
             } else {
-                await axios.put(`/api/content/page/${selectedSeoPage}/seo`, {
+                const isStandard = standardPages.some(p => p.id === selectedSeoPage);
+                const path = getPagePath(selectedSeoPage);
+                
+                if (isStandard) {
+                    await axios.put(`/api/content/page/${selectedSeoPage}/seo`, {
+                        title: seoManagerForm.title || '',
+                        description: seoManagerForm.description || '',
+                        keywords: seoManagerForm.keywords || '',
+                        faqs: seoManagerForm.faqs || [],
+                    });
+                }
+                
+                await axios.post(`/api/admin/seo`, {
+                    page_path: path,
                     title: seoManagerForm.title || '',
                     description: seoManagerForm.description || '',
                     keywords: seoManagerForm.keywords || '',
+                    canonical_url: seoManagerForm.canonical_url || '',
+                    og_title: seoManagerForm.og_title || '',
+                    og_description: seoManagerForm.og_description || '',
+                    og_image: seoManagerForm.og_image || '',
+                    header_scripts: seoManagerForm.header || '',
+                    footer_scripts: seoManagerForm.footer || '',
+                    faqs: seoManagerForm.faqs || [],
                 });
+                
                 toast.success(`SEO metadata for ${selectedSeoPage} saved successfully`);
             }
+            fetchSeoPages();
         } catch (error) {
             console.error(error);
             toast.error(`Failed to save settings`);
@@ -330,6 +515,31 @@ const AdminDashboardContent = () => {
 
     // CLEAR / DELETE PAGE SEO
     const clearPageSeo = async (pageId) => {
+        const isStandard = standardPages.some(p => p.id === pageId);
+
+        if (!isStandard && pageId !== 'global-scripts') {
+            const result = await Swal.fire({
+                title: 'Delete SEO Configuration?',
+                html: `Are you sure you want to delete the SEO configuration for <code>${pageId}</code>? This cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#CC0336',
+                cancelButtonColor: '#06056C',
+                confirmButtonText: 'Yes, delete it',
+                cancelButtonText: 'Cancel',
+            });
+            if (!result.isConfirmed) return;
+            try {
+                await axios.delete(`/api/admin/seo?page_path=${encodeURIComponent(pageId)}`);
+                toast.success(`SEO deleted for ${pageId}`);
+                fetchSeoPages();
+            } catch (error) {
+                console.error(error);
+                toast.error('Failed to delete SEO configuration');
+            }
+            return;
+        }
+
         const result = await Swal.fire({
             title: 'Clear SEO Metadata?',
             html: `This will reset the <b>title</b>, <b>description</b>, and <b>keywords</b> for <code>${pageId}</code> to empty.`,
@@ -344,6 +554,7 @@ const AdminDashboardContent = () => {
         try {
             await axios.put(`/api/content/page/${pageId}/seo`, { title: '', description: '', keywords: '' });
             toast.success(`SEO cleared for ${pageId}`);
+            fetchSeoPages();
         } catch (error) {
             console.error(error);
             toast.error('Failed to clear SEO metadata');
@@ -382,23 +593,9 @@ const AdminDashboardContent = () => {
 
 
             case 'seo': {
-                const availablePagesList = [
-                    { id: 'global-scripts', label: 'Global Scripts (Header & Footer)' },
-                    { id: 'home', label: 'Home Page' },
-                    { id: 'about', label: 'About Page' },
-                    { id: 'faq', label: 'FAQ Page' },
-                    { id: 'blogs', label: 'Blogs List Page' },
-                    { id: 'house-moving', label: 'House Moving Page' },
-                    { id: 'manpower', label: 'Manpower Page' },
-                    { id: 'storage-services', label: 'Storage Services Page' },
-                    { id: 'insurance', label: 'Insurance Page' },
-                    { id: 'license', label: 'License Page' },
-                    { id: 'licensee', label: 'Licensee Page' },
-                    { id: 'insurance-policy-claims', label: 'Insurance Policy Claims Page' }
-                ];
-
-                const filteredPagesList = availablePagesList.filter(page => {
-                    const slug = page.id === 'global-scripts' ? 'global' : `/${page.id === 'home' ? '' : page.id}`;
+                const mergedList = getMergedSeoPages();
+                const filteredPagesList = mergedList.filter(page => {
+                    const slug = page.path;
                     return page.label.toLowerCase().includes(seoSearchQuery.toLowerCase()) ||
                         slug.toLowerCase().includes(seoSearchQuery.toLowerCase());
                 });
@@ -422,7 +619,7 @@ const AdminDashboardContent = () => {
                                             onChange={handleSeoPageChange}
                                             className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
                                         >
-                                            {availablePagesList.map(page => (
+                                            {getMergedSeoPages().map(page => (
                                                 <option key={page.id} value={page.id}>{page.label}</option>
                                             ))}
                                         </select>
@@ -476,6 +673,81 @@ const AdminDashboardContent = () => {
                                                     placeholder="Enter SEO Meta Keywords (comma separated)..."
                                                 />
                                             </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Canonical URL</label>
+                                                <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                    value={seoManagerForm.canonical_url || ''}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, canonical_url: e.target.value })}
+                                                    placeholder="e.g. https://galaxymovers.ca/about"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-sm font-semibold text-gray-900">OG Title</label>
+                                                    <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                        value={seoManagerForm.og_title || ''}
+                                                        onChange={(e) => setSeoManagerForm({ ...seoManagerForm, og_title: e.target.value })}
+                                                        placeholder="Custom Social Title"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-sm font-semibold text-gray-900">OG Image URL</label>
+                                                    <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                        value={seoManagerForm.og_image || ''}
+                                                        onChange={(e) => setSeoManagerForm({ ...seoManagerForm, og_image: e.target.value })}
+                                                        placeholder="https://example.com/image.jpg"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">OG Description</label>
+                                                <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                    value={seoManagerForm.og_description || ''}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, og_description: e.target.value })}
+                                                    placeholder="Custom Social Description"
+                                                    rows={2}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Page-Specific Header Scripts (inside &lt;head&gt;)</label>
+                                                <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg font-mono text-xs"
+                                                    value={seoManagerForm.header || ''}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, header: e.target.value })}
+                                                    placeholder="e.g. <script>...</script>"
+                                                    rows={3}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Page-Specific Footer Scripts (before &lt;/body&gt;)</label>
+                                                <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg font-mono text-xs"
+                                                    value={seoManagerForm.footer || ''}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, footer: e.target.value })}
+                                                    placeholder="e.g. <script>...</script>"
+                                                    rows={3}
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col gap-4 border-t border-gray-100 pt-6">
+                                        <h3 className="text-lg font-bold text-gray-900">Dynamic FAQ Schema Builder</h3>
+                                        {seoManagerForm.faqs && seoManagerForm.faqs.map((faq, idx) => (
+                                            <div key={idx} className="flex flex-col gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50 relative">
+                                                <button onClick={() => removeSeoManagerFaq(idx)} className="absolute top-3 right-3 text-red-500 hover:text-red-700 p-1">
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-xs font-semibold text-gray-700">Question</label>
+                                                    <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg" value={faq.q} onChange={(e) => updateSeoManagerFaq(idx, 'q', e.target.value)} placeholder="e.g. Do you handle piano moves?" />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-xs font-semibold text-gray-700">Answer text</label>
+                                                    <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg" value={faq.a} onChange={(e) => updateSeoManagerFaq(idx, 'a', e.target.value)} rows={2} placeholder="Answer text..." />
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <button onClick={addSeoManagerFaq} className="w-fit text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                            <FiPlus /> Add FAQ
+                                        </button>
+                                    </div>
                                         </>
                                     )}
 
@@ -502,7 +774,7 @@ const AdminDashboardContent = () => {
                                     <div className="p-6 md:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-center gap-4">
                                             <span className="text-sm font-semibold text-gray-500 hidden md:block">
-                                                {filteredPagesList.length} found ({availablePagesList.length} total)
+                                                {filteredPagesList.length} found ({mergedList.length} total)
                                             </span>
                                         </div>
                                         <div className="relative w-full sm:w-80">
@@ -537,7 +809,7 @@ const AdminDashboardContent = () => {
                                                         </td>
                                                         <td className="py-4 px-6">
                                                             <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded">
-                                                                {page.id === 'global-scripts' ? 'Global (All Pages)' : `/${page.id === 'home' ? '' : page.id}`}
+                                                                {page.id === 'global-scripts' ? 'Global (All Pages)' : page.path}
                                                             </span>
                                                         </td>
                                                         <td className="py-4 px-6">

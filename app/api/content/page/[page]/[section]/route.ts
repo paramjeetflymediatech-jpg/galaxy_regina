@@ -43,12 +43,38 @@ export async function PUT(
       });
     }
 
+    // Save page SEO in the Seo table in addition to Content table
+    if (section === 'seo') {
+      const pagePathMap: Record<string, string> = {
+        'home': '/',
+        'about': '/about',
+        'faq': '/faqs',
+        'blogs': '/blogs',
+        'house-moving': '/house-moving',
+        'manpower': '/manpower',
+        'storage-services': '/StorageServices',
+        'insurance': '/Insurance',
+        'license': '/License',
+        'licensee': '/licensee',
+        'insurance-policy-claims': '/insurance-and-policy-claims'
+      };
+      const page_path = pagePathMap[page] || `/${page}`;
+      const { title, description, keywords, faqs } = body;
+      await Seo.upsert({
+        page_path,
+        title: title || '',
+        description: description || '',
+        keywords: keywords || '',
+        faqs: faqs ? (typeof faqs === 'string' ? faqs : JSON.stringify(faqs)) : '[]'
+      });
+    }
+
     // Map dictionary key-values into database rows
     const rows = Object.entries(body).map(([key, value]) => ({
       page,
       section,
       key,
-      value: value !== null && value !== undefined ? String(value) : null,
+      value: value !== null && value !== undefined ? (typeof value === 'object' ? JSON.stringify(value) : String(value)) : null,
     }));
 
     // Perform bulk create with Postgres ON CONFLICT DO UPDATE

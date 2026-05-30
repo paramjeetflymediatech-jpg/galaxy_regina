@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Blog } from '@/src/lib/models';
+import { Blog, Seo } from '@/src/lib/models';
 import { saveUploadedFile } from '@/src/lib/uploadHelper';
 
 export async function POST(request: Request) {
@@ -34,6 +34,21 @@ export async function POST(request: Request) {
       image_url,
       meta_title,
       meta_description,
+    });
+
+    // Also upsert in the Seo table
+    await Seo.upsert({
+      page_path: `/blogs/${slug}`,
+      title: meta_title || title || '',
+      description: meta_description || description || '',
+      keywords: '',
+      canonical_url: '',
+      og_title: title || '',
+      og_description: description || '',
+      og_image: image_url || '',
+      header_scripts: '',
+      footer_scripts: '',
+      faqs: '[]'
     });
 
     return NextResponse.json({

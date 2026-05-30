@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ServiceLocation, Location, Service } from '@/src/lib/models';
+import { ServiceLocation, Location, Service, Seo } from '@/src/lib/models';
 
 // GET ALL SERVICE LOCATIONS WITH THEIR LOCATIONS AND SERVICES
 export async function GET() {
@@ -23,7 +23,22 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { service_id, location_id, content, description, faqs } = body;
+    const { 
+      service_id, 
+      location_id, 
+      content, 
+      description, 
+      faqs,
+      meta_title,
+      meta_description,
+      meta_keywords,
+      canonical_url,
+      og_title,
+      og_description,
+      og_image,
+      header_scripts,
+      footer_scripts
+    } = body;
 
     if (!service_id || !location_id) {
       return NextResponse.json(
@@ -54,6 +69,27 @@ export async function POST(request: Request) {
       description: description || '',
       faqs: typeof faqs === 'string' ? faqs : JSON.stringify(faqs || [])
     });
+
+    // Save SEO data to the Seo table
+    const service = await Service.findByPk(parseInt(service_id, 10));
+    const location = await Location.findByPk(parseInt(location_id, 10));
+    if (service && location) {
+      const page_path = `/location/${service.slug}-in-${location.slug}`;
+      const parsedFaqs = faqs ? (typeof faqs === 'string' ? faqs : JSON.stringify(faqs)) : '[]';
+      await Seo.upsert({
+        page_path,
+        title: meta_title || '',
+        description: meta_description || '',
+        keywords: meta_keywords || '',
+        canonical_url: canonical_url || '',
+        og_title: og_title || '',
+        og_description: og_description || '',
+        og_image: og_image || '',
+        header_scripts: header_scripts || '',
+        footer_scripts: footer_scripts || '',
+        faqs: parsedFaqs
+      });
+    }
 
     return NextResponse.json({ success: true, serviceLocation: newServiceLocation });
   } catch (error: any) {

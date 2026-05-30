@@ -34,6 +34,27 @@ export async function GET(
       });
     }
 
+    // Mapped page path in Seo table
+    const pagePathMap: Record<string, string> = {
+      'home': '/',
+      'about': '/about',
+      'faq': '/faqs',
+      'blogs': '/blogs',
+      'house-moving': '/house-moving',
+      'manpower': '/manpower',
+      'storage-services': '/StorageServices',
+      'insurance': '/Insurance',
+      'license': '/License',
+      'licensee': '/licensee',
+      'insurance-policy-claims': '/insurance-and-policy-claims'
+    };
+
+    const page_path = pagePathMap[page];
+    let seoRecord = null;
+    if (page_path) {
+      seoRecord = await Seo.findOne({ where: { page_path } });
+    }
+
     // Retrieve all content rows matching the page name
     const results = await Content.findAll({
       where: { page },
@@ -47,6 +68,17 @@ export async function GET(
       acc[item.section][item.key] = item.value;
       return acc;
     }, {});
+
+    // Ensure seo section is populated with data from the Seo table if it exists
+    if (seoRecord) {
+      if (!content.seo) {
+        content.seo = {};
+      }
+      content.seo.title = seoRecord.title || content.seo.title || '';
+      content.seo.description = seoRecord.description || content.seo.description || '';
+      content.seo.keywords = seoRecord.keywords || content.seo.keywords || '';
+      content.seo.faqs = seoRecord.faqs || '[]';
+    }
 
     return NextResponse.json({
       success: true,

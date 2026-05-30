@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Blog } from '@/src/lib/models';
+import { Blog, Seo } from '@/src/lib/models';
 import { saveUploadedFile, deleteUploadedFile } from '@/src/lib/uploadHelper';
 
 type Params = {
@@ -75,6 +75,8 @@ export async function PUT(
       );
     }
 
+    const oldSlug = blog.slug;
+
     // Save image if uploaded
     const image_url = await saveUploadedFile(image, 'blogs');
     if (image_url !== null && blog.image_url) {
@@ -91,6 +93,34 @@ export async function PUT(
       meta_description: meta_description !== null ? meta_description : blog.meta_description,
       image_url: image_url !== null ? image_url : blog.image_url,
     });
+
+    // Also upsert in the Seo table
+    const page_path = `/blogs/${slug}`;
+    const oldPagePath = `/blogs/${oldSlug}`;
+
+    let existingSeo = await Seo.findOne({ where: { page_path } });
+    if (!existingSeo && oldPagePath) {
+      existingSeo = await Seo.findOne({ where: { page_path: oldPagePath } });
+    }
+
+    await Seo.upsert({
+      page_path,
+      title: meta_title !== null ? (meta_title || '') : (existingSeo?.title || title || ''),
+      description: meta_description !== null ? (meta_description || '') : (existingSeo?.description || description || ''),
+      keywords: existingSeo?.keywords || '',
+      canonical_url: existingSeo?.canonical_url || '',
+      og_title: existingSeo?.og_title || title || '',
+      og_description: existingSeo?.og_description || description || '',
+      og_image: existingSeo?.og_image || image_url || blog.image_url || '',
+      header_scripts: existingSeo?.header_scripts || '',
+      footer_scripts: existingSeo?.footer_scripts || '',
+      faqs: existingSeo?.faqs || '[]'
+    });
+
+    if (oldPagePath && oldPagePath !== page_path) {
+      // Delete old SEO record if slug changed
+      await Seo.destroy({ where: { page_path: oldPagePath } });
+    }
 
     return NextResponse.json({
       success: true,
@@ -123,11 +153,16 @@ export async function DELETE(
       );
     }
 
+    const page_path = `/blogs/${blog.slug}`;
+
     if (blog.image_url) {
       await deleteUploadedFile(blog.image_url);
     }
 
     await blog.destroy();
+
+    // Delete matching SEO record
+    await Seo.destroy({ where: { page_path } });
 
     return NextResponse.json({
       success: true,

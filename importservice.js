@@ -244,14 +244,23 @@ async function main() {
       });
 
       if (pagePath) {
+        let finalPagePath = pagePath;
+        if (finalPagePath.startsWith('/saskatchewan/')) {
+          finalPagePath = finalPagePath.replace('/saskatchewan/', '/location/');
+        }
+        let finalCanonicalUrl = canonical_url;
+        if (finalCanonicalUrl && finalCanonicalUrl.includes('/saskatchewan/')) {
+          finalCanonicalUrl = finalCanonicalUrl.replace('/saskatchewan/', '/location/');
+        }
         seoRows.push({
-          page_path:   pagePath,
+          page_path:   finalPagePath,
           title:       meta_title || null,
           description: meta_description || null,
           keywords:    keywords || null,
-          canonical_url: canonical_url || null,
+          canonical_url: finalCanonicalUrl || null,
           og_title:    og_title || null,
           og_description: og_description || null,
+          faqs:        JSON.stringify(faqs || []),
         });
       }
     }
@@ -278,7 +287,7 @@ async function main() {
       Seo,
       seoRows,
       ['page_path'],
-      ['title', 'description', 'keywords', 'canonical_url', 'og_title', 'og_description', 'updated_at']
+      ['title', 'description', 'keywords', 'canonical_url', 'og_title', 'og_description', 'faqs', 'updated_at']
     );
     console.log('  ✅ SEO records done.');
 

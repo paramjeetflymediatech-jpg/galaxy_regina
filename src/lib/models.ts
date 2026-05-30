@@ -479,6 +479,7 @@ export class Seo extends Model {
   declare og_image: string | null;
   declare header_scripts: string | null;
   declare footer_scripts: string | null;
+  declare faqs: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }
@@ -495,6 +496,7 @@ Seo.init(
     og_image: { type: DataTypes.STRING(500), allowNull: true },
     header_scripts: { type: DataTypes.TEXT, allowNull: true },
     footer_scripts: { type: DataTypes.TEXT, allowNull: true },
+    faqs: { type: DataTypes.TEXT, allowNull: true },
   },
   { sequelize, tableName: 'seos', underscored: true }
 );

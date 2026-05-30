@@ -108,6 +108,30 @@ export default async function RootLayout({
   const pathname = headerList.get('x-pathname') || '';
   const seoRecord = await getPageSpecificSeo(pathname);
 
+  // Parse page-specific FAQs and build the JSON-LD FAQ schema markup
+  let faqSchema = null;
+  if (seoRecord?.faqs) {
+    try {
+      const parsedFaqs = typeof seoRecord.faqs === 'string' ? JSON.parse(seoRecord.faqs) : seoRecord.faqs;
+      if (Array.isArray(parsedFaqs) && parsedFaqs.length > 0) {
+        faqSchema = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": parsedFaqs.map(faq => ({
+            "@type": "Question",
+            "name": faq.q || faq.question || '',
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": faq.a || faq.answer || ''
+            }
+          }))
+        };
+      }
+    } catch (e) {
+      console.error("❌ Failed to parse FAQs for schema generation in RootLayout:", e);
+    }
+  }
+
   return (
     <html
       lang="en"
@@ -128,6 +152,14 @@ export default async function RootLayout({
         {seoRecord?.og_title && <meta property="og:title" content={seoRecord.og_title} />}
         {seoRecord?.og_description && <meta property="og:description" content={seoRecord.og_description} />}
         {seoRecord?.og_image && <meta property="og:image" content={seoRecord.og_image} />}
+
+        {/* Dynamic Server-Side FAQ Schema injection from Seo Table */}
+        {faqSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+          />
+        )}
 
         {/* Dynamic Server-Side Header Script Injection */}
         {globalHeader && <HeadScript html={globalHeader} />}
