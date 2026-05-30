@@ -24,16 +24,6 @@ async function fetchAboutContent() {
   }
 }
 
-export async function generateMetadata() {
-  const content = await fetchAboutContent();
-  const seo = content?.seo || {};
-
-  return {
-    title: seo.aboutTitle || 'About Galaxy Movers Regina',
-    description: seo.aboutDescription || 'Learn more about Galaxy Movers Regina, your trusted moving partner in Saskatchewan.',
-  };
-}
-
 export default async function AboutPage() {
   const content = await fetchAboutContent();
 

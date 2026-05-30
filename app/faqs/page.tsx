@@ -3,15 +3,6 @@ import Navbar from '@/src/components/Navbar/Navbar';
 import PageHero from '@/src/components/PageHero/PageHero';
 import FAQ from '@/src/components/FAQ/FAQ';
 import Footer from '@/src/components/Footer/Footer';
-import { getSeoMetadata } from "@/src/lib/seo";
-
-export async function generateMetadata() {
-  return await getSeoMetadata(
-    'faq',
-    "Frequently Asked Questions | Galaxy Movers Regina",
-    "Got questions about our residential or commercial moving services? Find answers to frequently asked questions about moving in Regina."
-  );
-}
 
 const FaqPage = () => {
   return (

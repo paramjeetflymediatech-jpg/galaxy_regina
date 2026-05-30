@@ -17,24 +17,6 @@ async function getBlogPost(slug) {
   }
 }
 
-// Generate dynamic SEO metadata
-export async function generateMetadata({ params }) {
-  const resolvedParams = await params;
-  const post = await getBlogPost(resolvedParams.slug);
-
-  if (!post) {
-    return {
-      title: "Blog Post Not Found | Galaxy Movers Regina",
-      description: "The requested blog post could not be found.",
-    };
-  }
-
-  return {
-    title: post.meta_title || `${post.title} | Galaxy Movers Regina`,
-    description: post.meta_description || post.description || "Read our latest moving tips and guides.",
-  };
-}
-
 export default async function BlogPostPage({ params }) {
   const resolvedParams = await params;
   const post = await getBlogPost(resolvedParams.slug);

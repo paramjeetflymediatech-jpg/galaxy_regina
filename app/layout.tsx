@@ -7,7 +7,7 @@ import { Content, Seo } from "@/src/lib/models";
 import { Op } from "sequelize";
 import { headers } from "next/headers";
 import HeadScript from "@/src/components/Seo/HeadScript";
-
+import {getSeoMetadata} from "@/src/lib/seo"
 export const forceDynamic = 'force-dynamic'
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,11 +19,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Default fallback metadata (pages can override using generateMetadata)
-export const metadata: Metadata = {
-  title: "Galaxy Movers Regina | Trusted Local Moving Company",
-  description: "Professional moving services in Regina, Saskatchewan. Get a free quote today!",
-};
 
 // Fetch scripts on the server side
 async function getGlobalScripts() {
@@ -70,30 +65,30 @@ async function getGlobalScripts() {
 }
 
 // Fetch page-specific SEO record on the server side
-async function getPageSpecificSeo(pathname: string) {
-  if (!pathname) return null;
+// async function getPageSpecificSeo(pathname: string) {
+//   if (!pathname) return null;
 
-  try {
-    const slug = pathname.split('/').pop() || '';
-    const seoRecord = await Seo.findOne({
-      where: {
-        [Op.or]: [
-          { page_path: pathname },
-          { page_path: { [Op.like]: `%${pathname}` } },
-          ...(slug ? [
-            { page_path: `/location/${slug}` },
-            { page_path: { [Op.like]: `%/${slug}` } }
-          ] : [])
-        ]
-      }
-    });
+//   try {
+//     const slug = pathname.split('/').pop() || '';
+//     const seoRecord = await Seo.findOne({
+//       where: {
+//         [Op.or]: [
+//           { page_path: pathname },
+//           { page_path: { [Op.like]: `%${pathname}` } },
+//           ...(slug ? [
+//             { page_path: `/location/${slug}` },
+//             { page_path: { [Op.like]: `%/${slug}` } }
+//           ] : [])
+//         ]
+//       }
+//     });
 
-    return seoRecord;
-  } catch (error) {
-    console.error("❌ Failed to load page-specific SEO record:", error);
-  }
-  return null;
-}
+//     return seoRecord;
+//   } catch (error) {
+//     console.error("❌ Failed to load page-specific SEO record:", error);
+//   }
+//   return null;
+// }
 
 export default async function RootLayout({
   children,
@@ -105,31 +100,9 @@ export default async function RootLayout({
   // Read current request path from request headers
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
-  const seoRecord = await getPageSpecificSeo(pathname);
+  const seoRecord = await getSeoMetadata(pathname);
  
-  // Parse page-specific FAQs and build the JSON-LD FAQ schema markup
-  let faqSchema = null;
-  if (seoRecord?.faqs) {
-    try {
-      const parsedFaqs = typeof seoRecord.faqs === 'string' ? JSON.parse(seoRecord.faqs) : seoRecord.faqs;
-      if (Array.isArray(parsedFaqs) && parsedFaqs.length > 0) {
-        faqSchema = {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          "mainEntity": parsedFaqs.map(faq => ({
-            "@type": "Question",
-            "name": faq.q || faq.question || '',
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": faq.a || faq.answer || ''
-            }
-          }))
-        };
-      }
-    } catch (e) {
-      console.error("❌ Failed to parse FAQs for schema generation in RootLayout:", e);
-    }
-  }
+  const faqSchema = seoRecord?.faqSchema || null;
 
   return (
     <html
@@ -142,6 +115,16 @@ export default async function RootLayout({
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         />
+
+        {/* Dynamic Page-Specific SEO Metadata from Seo Table */}
+        {seoRecord?.title && <title>{seoRecord.title}</title>}
+        {seoRecord?.description && <meta name="description" content={seoRecord.description} />}
+        {seoRecord?.keywords && <meta name="keywords" content={seoRecord.keywords} />}
+        {seoRecord?.canonical_url && <link rel="canonical" href={seoRecord.canonical_url} />}
+        {seoRecord?.og_title && <meta property="og:title" content={seoRecord.og_title} />}
+        {seoRecord?.og_description && <meta property="og:description" content={seoRecord.og_description} />}
+        {seoRecord?.og_image && <meta property="og:image" content={seoRecord.og_image} />}
+
 
         {/* Dynamic Server-Side FAQ Schema injection from Seo Table */}
         {faqSchema && (
