@@ -107,6 +107,7 @@ export default async function RootLayout({
   const headerList = await headers();
   const pathname = headerList.get('x-pathname') || '';
   const seoRecord = await getPageSpecificSeo(pathname);
+  console.log(seoRecord,'resssfsdfdsfdsf',pathname)
 
   // Parse page-specific FAQs and build the JSON-LD FAQ schema markup
   let faqSchema = null;
