@@ -96,6 +96,9 @@ const MovingCompanyWebsite = () => {
     const displayContent =  serviceData?.content || locationData.content || '<p>Details are currently being updated.</p>';
     const displaySubtitle = locationData.service_location_description || serviceData?.description || locationData.hero_subtitle || `Trust Galaxy Movers for secure, professional transport. Your precious items are safe with our Local Moving Company in ${locName}.`;
 
+    console.log(locationData,'locationData')
+    console.log(serviceData,'servie Data')
+    console.log(displayContent,'displayContent')
     let parsedServiceFaqs = null;
     if (serviceData?.faqs) {
         try {
