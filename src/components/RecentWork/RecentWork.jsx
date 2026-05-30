@@ -7,19 +7,19 @@ const RecentWork = () => {
 
   const works = [
     {
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a26?w=800",
+      image: "./services/house_mover.jpg",
       title: "Full House Move - Regina",
     },
     {
-      image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
+      image: "./services/condo.jpg",
       title: "Mattress & Furniture Wrapping",
     },
     {
-      image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800",
+      image: "./services/commercial_office_mover.jpg",
       title: "Office Relocation",
     },
     {
-      image: "https://images.unsplash.com/photo-1622290291469-4f5f8c2e1b3e?w=800",
+      image: "./services/heavy.jpg",
       title: "Bedroom Setup Completed",
     }
   ];
@@ -41,7 +41,7 @@ const RecentWork = () => {
   return (
     <section className="recent-work">
       <div className="container">
-        <h2 className="main-title">MOVING WORK RECENTLY COMPLETED</h2>
+        <h2 className="main-title blue">MOVING WORK RECENTLY COMPLETED</h2>
         <h3 className="sub-title">TRUST GALAXY MOVERS REGINA, SK</h3>
         <p className="work-desc" style={{ textAlign: 'center', maxWidth: '800px', margin: '15px auto 30px', color: '#666', lineHeight: '1.6', fontSize: '1.1rem' }}>
           Galaxy Movers Regina has recently completed home moves, apartment relocations, office shifting, furniture moving, and long distance moving projects across Regina, SK. Our team continues to earn customer trust by delivering careful handling, reliable scheduling, professional support, and stress-free moving services for every relocation.
