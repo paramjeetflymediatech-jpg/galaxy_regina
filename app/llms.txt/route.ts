@@ -41,16 +41,8 @@ export async function GET(request: Request) {
 - [Home Page](${baseUrl}/): Main entry point for Galaxy Movers Regina, featuring a quick booking form and list of services.
 - [About Us](${baseUrl}/about): Information about the company history, our professional moving team, and credentials.
 - [Book Appointment](${baseUrl}/book-appointment): Dynamic moving quote and reservation request form.
-- [FAQs](${baseUrl}/faqs): Answers to frequently asked questions about rates, insurance, scheduling, and packing.
-- [House Moving](${baseUrl}/house-moving): Details about our specialized residential house moving services.
-- [Storage Services](${baseUrl}/StorageServices): Information on secure short-term and long-term storage facilities.
-- [Insurance Info](${baseUrl}/Insurance): Details on moving insurance options, coverage levels, and transit protection.
-- [Insurance & Policy Claims](${baseUrl}/insurance-and-policy-claims): Policy terms, claim forms, and submission instructions.
-- [License Info](${baseUrl}/License): Licensing details, regulatory compliance, and operating authority.
-- [Licensee Registration](${baseUrl}/licensee): Application form for licensing partners and subcontractors.
-- [Manpower Services](${baseUrl}/manpower): Loading, unloading, and labor-only moving help.
 - [Blog Directory](${baseUrl}/blogs): Latest news, moving tips, and checklist resources.
-
+- [Location](${baseUrl}/location): Locations served by Galaxy Movers Regina, offering specialized moving services.
 `;
 
     if (locationSeos.length > 0) {

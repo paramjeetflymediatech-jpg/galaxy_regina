@@ -146,15 +146,6 @@ export default async function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         />
 
-        {/* Dynamic Page-Specific SEO Metadata from Seo Table */}
-        {seoRecord?.title && <title>{seoRecord.title}</title>}
-        {seoRecord?.description && <meta name="description" content={seoRecord.description} />}
-        {seoRecord?.keywords && <meta name="keywords" content={seoRecord.keywords} />}
-        {seoRecord?.canonical_url && <link rel="canonical" href={seoRecord.canonical_url} />}
-        {seoRecord?.og_title && <meta property="og:title" content={seoRecord.og_title} />}
-        {seoRecord?.og_description && <meta property="og:description" content={seoRecord.og_description} />}
-        {seoRecord?.og_image && <meta property="og:image" content={seoRecord.og_image} />}
-
         {/* Dynamic Server-Side FAQ Schema injection from Seo Table */}
         {faqSchema && (
           <script

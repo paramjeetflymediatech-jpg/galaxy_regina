@@ -18,8 +18,7 @@ const Home = () => {
     <>
       <HeroSection />
       <Trusted />
-      <BestMovers />
-      <Services />
+      <BestMovers /> 
       <WhyUs />
       <CtaBanner />
       <CompanyIntro />

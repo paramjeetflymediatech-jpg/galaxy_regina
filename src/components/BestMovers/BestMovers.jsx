@@ -76,7 +76,7 @@ const BestMovers = () => {
             Moving Work Recently Completed​
           </h2>
           <h2 className= "section-title" style={{color:"red"}}>Trust Galaxy Movers Regina, Sk</h2>
-
+          <p className="trusted-subtitle" style={{ maxWidth: '800px', margin: '20px auto 35px', textTransform: 'none', fontSize: '1.2rem', color:"#475569",lineHeight: '1.6' }} >Galaxy Movers Regina has recently completed home moves, apartment relocations, office shifting, furniture moving, and long distance moving projects across Regina, SK. Our team continues to earn customer trust by delivering careful handling, reliable scheduling, professional support, and stress-free moving services for every relocation.</p>
           <div className="swiper-container">
 
             <img

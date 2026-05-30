@@ -16,15 +16,8 @@ export async function GET(request: Request) {
       { path: '/', priority: '1.0', changefreq: 'daily' },
       { path: '/about', priority: '0.8', changefreq: 'monthly' },
       { path: '/book-appointment', priority: '0.8', changefreq: 'monthly' },
-      { path: '/faqs', priority: '0.8', changefreq: 'weekly' },
-      { path: '/house-moving', priority: '0.8', changefreq: 'monthly' },
-      { path: '/Insurance', priority: '0.8', changefreq: 'monthly' },
-      { path: '/insurance-and-policy-claims', priority: '0.8', changefreq: 'monthly' },
-      { path: '/License', priority: '0.8', changefreq: 'monthly' },
-      { path: '/licensee', priority: '0.8', changefreq: 'monthly' },
-      { path: '/manpower', priority: '0.8', changefreq: 'monthly' },
-      { path: '/StorageServices', priority: '0.8', changefreq: 'monthly' },
       { path: '/blogs', priority: '0.8', changefreq: 'weekly' },
+      { path: '/location', priority: '0.8', changefreq: 'weekly' },
     ];
 
     // Fetch all SEO paths from the database, excluding 'global' and admin paths
