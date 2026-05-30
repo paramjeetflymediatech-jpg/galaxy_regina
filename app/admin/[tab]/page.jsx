@@ -661,7 +661,7 @@ const AdminDashboardContent = () => {
                 });
 
                 const totalPages = Math.ceil(filteredPagesList.length / SEO_ITEMS_PER_PAGE);
-                const currentPages = filteredPagesList.slice((seoCurrentPage - 1) * SEO_ITEMS_PER_PAGE, seoCurrentPage * ITEMS_PER_PAGE);
+                const currentPages = filteredPagesList.slice((seoCurrentPage - 1) * SEO_ITEMS_PER_PAGE, seoCurrentPage * SEO_ITEMS_PER_PAGE);
 
                 return (
                     <div className="flex flex-col gap-6 w-full">

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Content } from '@/src/lib/models';
+import { Content, Seo } from '@/src/lib/models';
 
 type Params = {
   page: string;
@@ -26,6 +26,21 @@ export async function PUT(
         { success: false, message: 'Update payload is required' },
         { status: 400 }
       );
+    }
+
+    // Save global scripts in the Seo table instead of Content table
+    if (page === 'global' && section === 'scripts') {
+      const { header, footer } = body;
+      await Seo.upsert({
+        page_path: 'global',
+        header_scripts: header || '',
+        footer_scripts: footer || '',
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Global scripts updated successfully in Seo table',
+      });
     }
 
     // Map dictionary key-values into database rows

@@ -28,15 +28,24 @@ export async function generateMetadata({ params }) {
     // Try to find specific SEO record for this slug, matching ends-with since it might have a state prefix
     const seoRecord = await Seo.findOne({ 
       where: { 
-        page_path: { [Op.like]: `%/${slug}` }
+        [Op.or]: [
+          { page_path: `/location/${slug}` },
+          { page_path: { [Op.like]: `%/${slug}` } }
+        ]
       } 
     });
 
     if (seoRecord) {
       return {
-        title: seoRecord.title,
-        description: seoRecord.description,
-        keywords: seoRecord.keywords,
+        title: seoRecord.title || undefined,
+        description: seoRecord.description || undefined,
+        keywords: seoRecord.keywords || undefined,
+        alternates: seoRecord.canonical_url ? { canonical: seoRecord.canonical_url } : undefined,
+        openGraph: {
+          title: seoRecord.og_title || seoRecord.title || undefined,
+          description: seoRecord.og_description || seoRecord.description || undefined,
+          images: seoRecord.og_image ? [{ url: seoRecord.og_image }] : undefined,
+        }
       };
     }
   } catch (err) {
@@ -52,10 +61,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function LocationPage({ params }) {
-  // Await params as required by Next.js 15+
-  await params;
-
+export default async function LocationPage() {
   return (
     <>
       <Navbar />

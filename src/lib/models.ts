@@ -512,6 +512,9 @@ export class Seo extends Model {
   declare canonical_url: string | null;
   declare og_title: string | null;
   declare og_description: string | null;
+  declare og_image: string | null;
+  declare header_scripts: string | null;
+  declare footer_scripts: string | null;
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
 }

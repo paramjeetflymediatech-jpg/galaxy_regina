@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Content } from '@/src/lib/models';
+import { Content, Seo } from '@/src/lib/models';
 
 type Params = {
   page: string;
@@ -17,6 +17,21 @@ export async function GET(
         { success: false, message: 'Page name is required' },
         { status: 400 }
       );
+    }
+
+    // Retrieve global scripts from Seo table instead of Content table
+    if (page === 'global') {
+      const seoRecord = await Seo.findOne({ where: { page_path: 'global' } });
+      return NextResponse.json({
+        success: true,
+        page,
+        content: {
+          scripts: {
+            header: seoRecord?.header_scripts || '',
+            footer: seoRecord?.footer_scripts || '',
+          }
+        }
+      });
     }
 
     // Retrieve all content rows matching the page name

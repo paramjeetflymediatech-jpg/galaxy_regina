@@ -13,9 +13,27 @@ export function middleware(request) {
     }
   }
 
-  return NextResponse.next();
+  // Clone headers and inject the current pathname
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', pathname);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - Static asset files with a dot in the extension (e.g. .png, .ico, .txt, etc.)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+  ],
 };
