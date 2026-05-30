@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 import fs from 'fs';
 
 import { sequelize } from './src/lib/db';
@@ -53,14 +54,20 @@ async function main() {
     await sequelize.authenticate();
     console.log('✅ Connected.\n');
 
-    const jsonPath = 'servicecontant.json';
+    const jsonPath = process.argv[2] || 'servicecontant.json';
     if (!fs.existsSync(jsonPath)) {
       throw new Error(`File not found: ${jsonPath}`);
     }
 
     console.log(`Reading ${jsonPath}...`);
-    const entries = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-    console.log(`Loaded ${entries.length} entries.\n`);
+    let entries = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    console.log(`Loaded ${entries.length} entries.`);
+
+    // Filter to only include Saskatchewan province
+    entries = entries.filter(entry => 
+      entry && entry.state && entry.state.toLowerCase() === 'saskatchewan'
+    );
+    console.log(`Filtered to ${entries.length} entries for Saskatchewan.\n`);
 
     // ──────────────────────────────────────────────
     // PHASE 1: Warm in-memory caches from DB
