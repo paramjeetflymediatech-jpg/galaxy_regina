@@ -495,6 +495,13 @@ ServiceLocation.init(
 Service.belongsToMany(Location, { through: ServiceLocation, foreignKey: 'service_id' });
 Location.belongsToMany(Service, { through: ServiceLocation, foreignKey: 'location_id' });
 
+// Explicit associations for join model direct queries
+ServiceLocation.belongsTo(Location, { foreignKey: 'location_id' });
+Location.hasMany(ServiceLocation, { foreignKey: 'location_id', as: 'ServiceLocations' });
+
+ServiceLocation.belongsTo(Service, { foreignKey: 'service_id' });
+Service.hasMany(ServiceLocation, { foreignKey: 'service_id', as: 'ServiceLocations' });
+
 // 9. Seo Model
 export class Seo extends Model {
   declare id: number;

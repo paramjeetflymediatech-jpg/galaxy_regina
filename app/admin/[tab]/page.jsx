@@ -90,6 +90,8 @@ const AdminDashboardContent = () => {
         title: '',
         description: '',
         keywords: '',
+        header: '',
+        footer: '',
     });
 
     const [saving, setSaving] = useState(false);
@@ -405,14 +407,28 @@ const AdminDashboardContent = () => {
     // LOAD PAGE SEO
     const loadPageSeo = async (page) => {
         try {
-            const res = await axios.get(`/api/content/page/${page}`);
+            const pageName = page === 'global-scripts' ? 'global' : page;
+            const res = await axios.get(`/api/content/page/${pageName}`);
             if (res.data.success) {
-                const seo = res.data.content?.seo || {};
-                setSeoManagerForm({
-                    title: seo.title || '',
-                    description: seo.description || '',
-                    keywords: seo.keywords || '',
-                });
+                if (page === 'global-scripts') {
+                    const scripts = res.data.content?.scripts || {};
+                    setSeoManagerForm({
+                        title: '',
+                        description: '',
+                        keywords: '',
+                        header: scripts.header || '',
+                        footer: scripts.footer || '',
+                    });
+                } else {
+                    const seo = res.data.content?.seo || {};
+                    setSeoManagerForm({
+                        title: seo.title || '',
+                        description: seo.description || '',
+                        keywords: seo.keywords || '',
+                        header: '',
+                        footer: '',
+                    });
+                }
             }
         } catch (error) {
             console.error("Failed to load page SEO", error);
@@ -429,11 +445,23 @@ const AdminDashboardContent = () => {
     const savePageSeo = async () => {
         setSaving(true);
         try {
-            await axios.put(`/api/content/page/${selectedSeoPage}/seo`, seoManagerForm);
-            toast.success(`SEO metadata for ${selectedSeoPage} saved successfully`);
+            if (selectedSeoPage === 'global-scripts') {
+                await axios.put(`/api/content/page/global/scripts`, {
+                    header: seoManagerForm.header || '',
+                    footer: seoManagerForm.footer || '',
+                });
+                toast.success('Global scripts saved successfully');
+            } else {
+                await axios.put(`/api/content/page/${selectedSeoPage}/seo`, {
+                    title: seoManagerForm.title || '',
+                    description: seoManagerForm.description || '',
+                    keywords: seoManagerForm.keywords || '',
+                });
+                toast.success(`SEO metadata for ${selectedSeoPage} saved successfully`);
+            }
         } catch (error) {
             console.error(error);
-            toast.error(`Failed to save SEO metadata`);
+            toast.error(`Failed to save settings`);
         } finally {
             setSaving(false);
         }
@@ -612,6 +640,7 @@ const AdminDashboardContent = () => {
 
             case 'seo': {
                 const availablePagesList = [
+                    { id: 'global-scripts', label: 'Global Scripts (Header & Footer)' },
                     { id: 'home', label: 'Home Page' },
                     { id: 'about', label: 'About Page' },
                     { id: 'faq', label: 'FAQ Page' },
@@ -626,13 +655,13 @@ const AdminDashboardContent = () => {
                 ];
 
                 const filteredPagesList = availablePagesList.filter(page => {
-                    const slug = `/${page.id === 'home' ? '' : page.id}`;
+                    const slug = page.id === 'global-scripts' ? 'global' : `/${page.id === 'home' ? '' : page.id}`;
                     return page.label.toLowerCase().includes(seoSearchQuery.toLowerCase()) ||
                         slug.toLowerCase().includes(seoSearchQuery.toLowerCase());
                 });
 
                 const totalPages = Math.ceil(filteredPagesList.length / SEO_ITEMS_PER_PAGE);
-                const currentPages = filteredPagesList.slice((seoCurrentPage - 1) * SEO_ITEMS_PER_PAGE, seoCurrentPage * SEO_ITEMS_PER_PAGE);
+                const currentPages = filteredPagesList.slice((seoCurrentPage - 1) * SEO_ITEMS_PER_PAGE, seoCurrentPage * ITEMS_PER_PAGE);
 
                 return (
                     <div className="flex flex-col gap-6 w-full">
@@ -641,10 +670,10 @@ const AdminDashboardContent = () => {
 
                             {seoShowForm && (
                                 <div className="bg-white border border-gray-200 p-6 md:p-8 flex flex-col gap-6 mb-8 rounded-xl shadow-sm">
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2 capitalize">Edit SEO: {selectedSeoPage.replace(/-/g, ' ')}</h2>
+                                    <h2 className="text-xl font-bold text-gray-900 mb-2 capitalize">Edit: {selectedSeoPage.replace(/-/g, ' ')}</h2>
 
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-900">Select Page to Manage</label>
+                                        <label className="text-sm font-semibold text-gray-900">Select Item to Manage</label>
                                         <select
                                             value={selectedSeoPage}
                                             onChange={handleSeoPageChange}
@@ -655,38 +684,65 @@ const AdminDashboardContent = () => {
                                             ))}
                                         </select>
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-900">Meta Title</label>
-                                        <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
-                                            value={seoManagerForm.title}
-                                            onChange={(e) => setSeoManagerForm({ ...seoManagerForm, title: e.target.value })}
-                                            placeholder="Enter SEO Meta Title..."
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-900">Meta Description</label>
-                                        <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
-                                            value={seoManagerForm.description}
-                                            onChange={(e) => setSeoManagerForm({ ...seoManagerForm, description: e.target.value })}
-                                            placeholder="Enter SEO Meta Description..."
-                                            rows={4}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-900">Meta Keywords</label>
-                                        <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
-                                            value={seoManagerForm.keywords}
-                                            onChange={(e) => setSeoManagerForm({ ...seoManagerForm, keywords: e.target.value })}
-                                            placeholder="Enter SEO Meta Keywords (comma separated)..."
-                                        />
-                                    </div>
+
+                                    {selectedSeoPage === 'global-scripts' ? (
+                                        <>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Global Header Scripts (inside &lt;head&gt; / top of &lt;body&gt;)</label>
+                                                <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-slate-800 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg font-mono text-xs"
+                                                    value={seoManagerForm.header || ''}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, header: e.target.value })}
+                                                    placeholder="e.g. <!-- Google Tag Manager --> <script>...</script>"
+                                                    rows={8}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Global Footer Scripts (before closing &lt;/body&gt;)</label>
+                                                <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-slate-800 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg font-mono text-xs"
+                                                    value={seoManagerForm.footer || ''}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, footer: e.target.value })}
+                                                    placeholder="e.g. <script src='https://js.hs-scripts.com/...js'></script>"
+                                                    rows={8}
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Meta Title</label>
+                                                <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                    value={seoManagerForm.title}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, title: e.target.value })}
+                                                    placeholder="Enter SEO Meta Title..."
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Meta Description</label>
+                                                <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                    value={seoManagerForm.description}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, description: e.target.value })}
+                                                    placeholder="Enter SEO Meta Description..."
+                                                    rows={4}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-sm font-semibold text-gray-900">Meta Keywords</label>
+                                                <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg"
+                                                    value={seoManagerForm.keywords}
+                                                    onChange={(e) => setSeoManagerForm({ ...seoManagerForm, keywords: e.target.value })}
+                                                    placeholder="Enter SEO Meta Keywords (comma separated)..."
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
                                     <div className="flex gap-4 mt-2">
                                         <button
                                             className="bg-[#06056C] hover:bg-blue-900 text-white font-semibold py-3 px-6 transition-colors shadow-sm rounded-lg"
                                             onClick={() => { savePageSeo(); setSeoShowForm(false); }}
                                             disabled={saving}
                                         >
-                                            Save SEO Settings
+                                            Save Settings
                                         </button>
                                         <button
                                             className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 transition-colors border border-gray-200 shadow-sm rounded-lg"
@@ -738,7 +794,7 @@ const AdminDashboardContent = () => {
                                                         </td>
                                                         <td className="py-4 px-6">
                                                             <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded">
-                                                                /{page.id === 'home' ? '' : page.id}
+                                                                {page.id === 'global-scripts' ? 'Global (All Pages)' : `/${page.id === 'home' ? '' : page.id}`}
                                                             </span>
                                                         </td>
                                                         <td className="py-4 px-6">
@@ -902,7 +958,7 @@ const AdminDashboardContent = () => {
                             onClick={() => locationRef.current?.openNew()} 
                             className="bg-[#06056C] hover:bg-blue-900 text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
                         >
-                            <FiPlus /> {locationState.activeTab === 'provinces' ? 'Add Province' : locationState.activeTab === 'districts' ? 'Add Region' : 'Add City'}
+                            <FiPlus /> {locationState.activeTab === 'provinces' ? 'Add Province' : locationState.activeTab === 'districts' ? 'Add Region' : locationState.activeTab === 'service_locations' ? 'Add Service Location' : 'Add City'}
                         </button>
                     )}
                 </header>

@@ -33,10 +33,20 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
     });
     const [image, setImage] = useState(null);
 
+    // Service Locations
+    const [serviceLocations, setServiceLocations] = useState([]);
+    const [services, setServices] = useState([]);
+    const [serviceLocationForm, setServiceLocationForm] = useState({
+        id: null, service_id: '', location_id: '', content: '', description: '',
+        faqs: [{ q: '', a: '' }]
+    });
+
     useEffect(() => {
         fetchProvinces();
         fetchDistricts();
         fetchLocations();
+        fetchServices();
+        fetchServiceLocations();
     }, []);
 
     useImperativeHandle(ref, () => ({
@@ -44,6 +54,7 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
             if (activeTab === 'provinces') openNewProvince();
             else if (activeTab === 'districts') openNewDistrict();
             else if (activeTab === 'cities') openNewLocation();
+            else if (activeTab === 'service_locations') openNewServiceLocation();
         }
     }));
 
@@ -56,6 +67,8 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
     const fetchProvinces = async () => { try { const res = await axios.get('/api/provinces'); setProvinces(res.data.provinces || []); } catch (e) { console.error(e); } };
     const fetchDistricts = async () => { try { const res = await axios.get('/api/districts'); setDistricts(res.data.districts || []); } catch (e) { console.error(e); } };
     const fetchLocations = async () => { try { const res = await axios.get('/api/locations'); setLocations(res.data.locations || []); } catch (e) { console.error(e); } };
+    const fetchServices = async () => { try { const res = await axios.get('/api/services'); setServices(res.data.services || []); } catch (e) { console.error(e); } };
+    const fetchServiceLocations = async () => { try { const res = await axios.get('/api/service-locations'); setServiceLocations(res.data.serviceLocations || []); } catch (e) { console.error(e); } };
 
     const switchTab = (tab) => {
         setActiveTab(tab);
@@ -75,8 +88,21 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
     const filteredLocations = useMemo(() => locations.filter(l => l.location_name.toLowerCase().includes(searchQuery.toLowerCase()) || l.slug.toLowerCase().includes(searchQuery.toLowerCase())), [locations, searchQuery]);
     const paginatedLocations = filteredLocations.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
+    const filteredServiceLocations = useMemo(() => {
+        return serviceLocations.filter(sl => {
+            const locName = sl.location?.location_name || '';
+            const serviceTitle = sl.service?.title || '';
+            const query = searchQuery.toLowerCase();
+            return locName.toLowerCase().includes(query) || serviceTitle.toLowerCase().includes(query);
+        });
+    }, [serviceLocations, searchQuery]);
+    const paginatedServiceLocations = filteredServiceLocations.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
     const totalPages = Math.ceil(
-        (activeTab === 'provinces' ? filteredProvinces.length : activeTab === 'districts' ? filteredDistricts.length : filteredLocations.length) / ITEMS_PER_PAGE
+        (activeTab === 'provinces' ? filteredProvinces.length : 
+         activeTab === 'districts' ? filteredDistricts.length : 
+         activeTab === 'cities' ? filteredLocations.length : 
+         filteredServiceLocations.length) / ITEMS_PER_PAGE
     );
 
     // --- PROVINCE ACTIONS ---
@@ -166,6 +192,113 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
         try { await axios.delete(`/api/locations/${id}`); toast.success("Deleted!"); fetchLocations(); } catch (e) { toast.error("Error deleting"); }
     };
 
+    // --- SERVICE LOCATION ACTIONS ---
+    const handleServiceLocationChange = (e) => setServiceLocationForm({ ...serviceLocationForm, [e.target.name]: e.target.value });
+    
+    const handleSLFaqChange = (index, field, value) => {
+        const updatedFaqs = [...serviceLocationForm.faqs];
+        updatedFaqs[index][field] = value;
+        setServiceLocationForm({ ...serviceLocationForm, faqs: updatedFaqs });
+    };
+
+    const addSLFaq = () => {
+        setServiceLocationForm({
+            ...serviceLocationForm,
+            faqs: [...serviceLocationForm.faqs, { q: '', a: '' }]
+        });
+    };
+
+    const removeSLFaq = (index) => {
+        const updatedFaqs = serviceLocationForm.faqs.filter((_, i) => i !== index);
+        setServiceLocationForm({ ...serviceLocationForm, faqs: updatedFaqs });
+    };
+
+    const saveServiceLocation = async () => {
+        const { service_id, location_id } = serviceLocationForm;
+        if (!service_id || !location_id) return toast.error("Service and City selection are required");
+
+        const cleanFaqs = serviceLocationForm.faqs.filter(faq => faq.q.trim() && faq.a.trim());
+
+        const payload = {
+            ...serviceLocationForm,
+            faqs: cleanFaqs
+        };
+
+        try {
+            if (serviceLocationForm.id) {
+                await axios.put(`/api/service-locations/${serviceLocationForm.id}`, payload);
+                toast.success("Service Location Updated!");
+            } else {
+                await axios.post('/api/service-locations', payload);
+                toast.success("Service Location Added!");
+            }
+            setShowForm(false);
+            fetchServiceLocations();
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error saving service location");
+        }
+    };
+
+    const openNewServiceLocation = () => {
+        setServiceLocationForm({
+            id: null,
+            service_id: '',
+            location_id: '',
+            content: '',
+            description: '',
+            faqs: [{ q: '', a: '' }]
+        });
+        setEditing(false);
+        setShowForm(true);
+    };
+
+    const editServiceLocationHandler = (sl) => {
+        let parsedFaqs = [{ q: '', a: '' }];
+        if (sl.faqs) {
+            try {
+                parsedFaqs = typeof sl.faqs === 'string' ? JSON.parse(sl.faqs) : sl.faqs;
+                if (!Array.isArray(parsedFaqs) || parsedFaqs.length === 0) {
+                    parsedFaqs = [{ q: '', a: '' }];
+                }
+            } catch (e) {
+                parsedFaqs = [{ q: '', a: '' }];
+            }
+        }
+
+        setServiceLocationForm({
+            id: sl.id,
+            service_id: sl.service_id || '',
+            location_id: sl.location_id || '',
+            content: sl.content || '',
+            description: sl.description || '',
+            faqs: parsedFaqs
+        });
+        setEditing(true);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const deleteServiceLocation = async (id) => {
+        const result = await Swal.fire({
+            title: 'Delete Service Location?',
+            text: 'This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#CC0336',
+            cancelButtonColor: '#06056C',
+            confirmButtonText: 'Yes, delete it',
+            cancelButtonText: 'Cancel'
+        });
+        if (!result.isConfirmed) return;
+        try {
+            await axios.delete(`/api/service-locations/${id}`);
+            toast.success("Deleted!");
+            fetchServiceLocations();
+        } catch (e) {
+            toast.error("Error deleting");
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6 w-full">
             <div>
@@ -176,6 +309,7 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
                     <button onClick={() => switchTab('provinces')} className={`py-3 px-6 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === 'provinces' ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>Provinces & States</button>
                     <button onClick={() => switchTab('districts')} className={`py-3 px-6 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === 'districts' ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>Districts & Regions</button>
                     <button onClick={() => switchTab('cities')} className={`py-3 px-6 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === 'cities' ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>Cities & Locations</button>
+                    <button onClick={() => switchTab('service_locations')} className={`py-3 px-6 font-semibold text-sm whitespace-nowrap transition-colors ${activeTab === 'service_locations' ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}`}>Service Locations</button>
                 </div>
 
                 {/* --- PROVINCES TAB --- */}
@@ -493,6 +627,134 @@ const LocationManagement = forwardRef(({ onFormStateChange }, ref) => {
                                     <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
                                         <span className="text-sm text-gray-500">
                                             Showing <span className="font-medium">{filteredLocations.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredLocations.length)}</span> of <span className="font-medium">{filteredLocations.length}</span> cities
+                                        </span>
+                                        <div className="flex gap-2">
+                                            <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Previous</button>
+                                            <button disabled={currentPage === totalPages || totalPages === 0} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} className="px-3 py-1.5 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Next</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* --- SERVICE LOCATIONS TAB --- */}
+                {activeTab === 'service_locations' && (
+                    <div className="flex flex-col gap-6">
+                        {showForm && (
+                            <div className="bg-white border border-gray-200 p-6 md:p-8">
+                                <h2 className="text-xl font-bold text-gray-900 mb-6">{editing ? "Edit Service Location" : "Configure New Service Location"}</h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-sm font-semibold text-gray-900">Service *</label>
+                                        <select name="service_id" value={serviceLocationForm.service_id} onChange={handleServiceLocationChange} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" disabled={editing}>
+                                            <option value="">Select Service...</option>
+                                            {services.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-sm font-semibold text-gray-900">City/Location *</label>
+                                        <select name="location_id" value={serviceLocationForm.location_id} onChange={handleServiceLocationChange} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" disabled={editing}>
+                                            <option value="">Select City/Location...</option>
+                                            {locations.map(l => <option key={l.id} value={l.id}>{l.location_name}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-2 mb-6">
+                                    <label className="text-sm font-semibold text-gray-900">Description / Subtitle</label>
+                                    <textarea name="description" placeholder="Short description or subtitle for this service in this location..." value={serviceLocationForm.description} onChange={handleServiceLocationChange} rows={2} className="border border-gray-300 p-3 text-sm outline-none bg-white w-full resize-y focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                </div>
+
+                                <div className="flex flex-col gap-2 mb-6">
+                                    <label className="text-sm font-semibold text-gray-900 flex items-center gap-2"><FiFileText /> Service Location Content (HTML)</label>
+                                    <RichTextEditor value={serviceLocationForm.content} onChange={(val) => setServiceLocationForm({ ...serviceLocationForm, content: val })} placeholder="Specific content for this service location..." />
+                                </div>
+
+                                <div className="border-t border-gray-200 pt-6 mb-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-semibold text-gray-900">Frequently Asked Questions (FAQs)</h3>
+                                        <button onClick={addSLFaq} type="button" className="bg-gray-100 hover:bg-gray-200 text-[#06056C] font-semibold py-1.5 px-4 text-xs border border-gray-200 rounded flex items-center gap-1.5 transition-colors"><FiPlus /> Add FAQ</button>
+                                    </div>
+                                    <div className="flex flex-col gap-4">
+                                        {serviceLocationForm.faqs.map((faq, index) => (
+                                            <div key={index} className="flex flex-col gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg relative">
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-xs font-semibold text-gray-700">Question #{index + 1}</label>
+                                                    <input type="text" placeholder="e.g. What services do you offer?" value={faq.q} onChange={(e) => handleSLFaqChange(index, 'q', e.target.value)} className="border border-gray-300 p-2.5 text-xs outline-none bg-white w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <label className="text-xs font-semibold text-gray-700">Answer #{index + 1}</label>
+                                                    <textarea placeholder="e.g. We offer residential, commercial..." value={faq.a} onChange={(e) => handleSLFaqChange(index, 'a', e.target.value)} rows={2} className="border border-gray-300 p-2.5 text-xs outline-none bg-white w-full resize-y focus:border-blue-600 focus:ring-1 focus:ring-blue-600" />
+                                                </div>
+                                                {serviceLocationForm.faqs.length > 1 && (
+                                                    <button onClick={() => removeSLFaq(index)} type="button" className="absolute top-3 right-3 text-red-500 hover:text-red-700 p-1 text-xs font-bold transition-colors">Remove</button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4">
+                                    <button onClick={saveServiceLocation} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 transition-colors">{editing ? "Update" : "Save"}</button>
+                                    <button onClick={() => setShowForm(false)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200 font-semibold py-3 px-6 transition-colors">Cancel</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {!showForm && (
+                            <div className="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
+                                <div className="p-6 md:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-sm font-semibold text-gray-500 hidden md:block">
+                                            {filteredServiceLocations.length} found ({serviceLocations.length} total)
+                                        </span>
+                                    </div>
+                                    <div className="relative w-full sm:w-80">
+                                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search service locations..." 
+                                            value={searchQuery}
+                                            onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-500">
+                                                <th className="py-4 px-6 font-semibold">Service</th>
+                                                <th className="py-4 px-6 font-semibold">City/Location</th>
+                                                <th className="py-4 px-6 font-semibold">Description</th>
+                                                <th className="py-4 px-6 font-semibold text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedServiceLocations.map((sl, idx) => (
+                                                <tr key={sl.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                                                    <td className="py-4 px-6 font-semibold text-gray-900">{sl.service?.title || `Service ID: ${sl.service_id}`}</td>
+                                                    <td className="py-4 px-6 text-sm text-gray-700">{sl.location?.location_name || `Location ID: ${sl.location_id}`}</td>
+                                                    <td className="py-4 px-6 text-xs text-gray-500 max-w-xs truncate">{sl.description || 'No description'}</td>
+                                                    <td className="py-4 px-6">
+                                                        <div className="flex justify-end items-center gap-2">
+                                                            <button onClick={() => editServiceLocationHandler(sl)} title="Edit Service Location" className="bg-white border border-gray-200 hover:border-[#06056C] hover:bg-[#06056C] hover:text-white text-[#06056C] p-2 rounded-lg transition-all shadow-sm flex items-center justify-center"><FiEdit2 size={16} /></button>
+                                                            <button onClick={() => deleteServiceLocation(sl.id)} title="Delete Service Location" className="bg-white border border-gray-200 hover:border-[#CC0336] hover:bg-[#CC0336] hover:text-white text-[#CC0336] p-2 rounded-lg transition-all shadow-sm flex items-center justify-center"><FiTrash2 size={16} /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    {paginatedServiceLocations.length === 0 && <div className="p-10 text-center text-gray-500">No service locations found.</div>}
+                                </div>
+                                {totalPages > 1 && (
+                                    <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+                                        <span className="text-sm text-gray-500">
+                                            Showing <span className="font-medium">{filteredServiceLocations.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, filteredServiceLocations.length)}</span> of <span className="font-medium">{filteredServiceLocations.length}</span> service locations
                                         </span>
                                         <div className="flex gap-2">
                                             <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Previous</button>
