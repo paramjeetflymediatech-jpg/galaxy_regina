@@ -2,7 +2,7 @@ import React from "react";
 import Navbar from "@/src/components/Navbar/Navbar";
 import Footer from "@/src/components/Footer/Footer";
 import PageHero from "@/src/components/PageHero/PageHero";
-import { Blog, Faq } from "@/src/lib/models";
+import { Blog } from "@/src/lib/models";
 import { notFound } from "next/navigation";
 import BlogContactForm from "./BlogContactForm";
 
@@ -43,43 +43,27 @@ export default async function BlogPostPage({ params }) {
     notFound();
   }
 
-  let faqs = [];
-  try {
-    faqs = await Faq.findAll();
-  } catch (error) {
-    console.error("Failed to fetch FAQs:", error);
-  }
-
   const bgImage = "/Galaxy-Movers-Regina-8.jpeg";
 
-  // Use DB FAQs if available, otherwise fallback to a default generic schema
-  const schemaEntities = faqs.length > 0 
-    ? faqs.map(faq => ({
-        "@type": "Question",
-        "name": faq.question,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.answer
-        }
-      }))
-    : [
-        {
-          "@type": "Question",
-          "name": "How much does a local move cost in Regina?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The cost of a local move depends on the size of your home and the specific services required. We offer transparent, competitive hourly rates or flat-fee pricing depending on the job. Contact us for a free, accurate quote."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do you offer packing services?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, Galaxy Movers provides comprehensive packing and unpacking services using high-quality materials to ensure your belongings are transported safely."
-          }
-        }
-      ];
+  // Use default generic schema
+  const schemaEntities = [
+    {
+      "@type": "Question",
+      "name": "How much does a local move cost in Regina?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The cost of a local move depends on the size of your home and the specific services required. We offer transparent, competitive hourly rates or flat-fee pricing depending on the job. Contact us for a free, accurate quote."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer packing services?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Galaxy Movers provides comprehensive packing and unpacking services using high-quality materials to ensure your belongings are transported safely."
+      }
+    }
+  ];
 
   const faqSchema = {
     "@context": "https://schema.org",

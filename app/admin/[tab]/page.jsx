@@ -65,18 +65,6 @@ const AdminDashboardContent = () => {
             'Galaxy Movers Regina delivers reliable moving services.',
     });
 
-    // FAQ
-    const [faqs, setFaqs] = useState([]);
-    const [faqForm, setFaqForm] = useState({
-        question: '',
-        answer: '',
-    });
-    const [editingFaqId, setEditingFaqId] = useState(null);
-    const [faqShowForm, setFaqShowForm] = useState(false);
-    const [faqSearch, setFaqSearch] = useState('');
-    const [faqCurrentPage, setFaqCurrentPage] = useState(1);
-    const FAQ_ITEMS_PER_PAGE = 10;
-
     const [aboutShowForm, setAboutShowForm] = useState(false);
 
     // NEW STATES FOR SEO PAGE MANAGER & GLOBAL SCRIPTS
@@ -119,16 +107,11 @@ const AdminDashboardContent = () => {
 
     const loadPageContent = async () => {
         try {
-            const [homeResponse, aboutResponse, faqResponse] =
+            const [homeResponse, aboutResponse] =
                 await Promise.all([
                     axios.get('/api/content/page/home'),
                     axios.get('/api/content/page/about'),
-                    axios.get('/api/admin/faqs'),
                 ]);
-
-            if (faqResponse.data.success) {
-                setFaqs(faqResponse.data.faqs || []);
-            }
 
             if (homeResponse.data.success) {
                 const pageContent = homeResponse.data.content || {};
@@ -224,41 +207,6 @@ const AdminDashboardContent = () => {
         });
     };
 
-    // FAQ
-    const handleFaqChange = (e) => {
-        setFaqForm({
-            ...faqForm,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const resetFaqForm = () => {
-        setFaqForm({
-            question: '',
-            answer: '',
-        });
-        setEditingFaqId(null);
-        setFaqShowForm(false);
-    };
-
-    const openNewFaq = () => {
-        resetFaqForm();
-        setFaqShowForm(true);
-    };
-
-    const handleFaqSearchChange = (e) => {
-        setFaqSearch(e.target.value);
-        setFaqCurrentPage(1);
-    };
-
-    const filteredFaqs = faqs.filter(faq =>
-        (faq.question && faq.question.toLowerCase().includes(faqSearch.toLowerCase())) ||
-        (faq.answer && faq.answer.toLowerCase().includes(faqSearch.toLowerCase()))
-    );
-
-    const faqTotalPages = Math.ceil(filteredFaqs.length / FAQ_ITEMS_PER_PAGE);
-    const paginatedFaqs = filteredFaqs.slice((faqCurrentPage - 1) * FAQ_ITEMS_PER_PAGE, faqCurrentPage * FAQ_ITEMS_PER_PAGE);
-
     // SAVE HERO
     const saveHeroContent = async () => {
         setSaving(true);
@@ -315,94 +263,7 @@ const AdminDashboardContent = () => {
         }
     };
 
-    // FAQ LOAD
-    const loadFaqs = async () => {
-        try {
-            const response = await axios.get('/api/admin/faqs');
-            if (response.data.success) {
-                setFaqs(response.data.faqs || []);
-            }
-        } catch (error) {
-            console.error('Failed to load FAQs', error);
-        }
-    };
 
-    // SAVE FAQ
-    const saveFaq = async () => {
-        if (!faqForm.question || !faqForm.answer) {
-            toast.error('Question and Answer are required');
-            return;
-        }
-
-        setSaving(true);
-        try {
-            if (editingFaqId) {
-                await axios.put(`/api/admin/faqs/${editingFaqId}`, faqForm);
-                toast.success('FAQ updated successfully');
-            } else {
-                await axios.post('/api/admin/faqs', faqForm);
-                toast.success('FAQ added successfully');
-            }
-            resetFaqForm();
-            setFaqShowForm(false);
-            loadPageContent();
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to save FAQ');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // DELETE FAQ
-    const deleteFaq = async (id) => {
-        const result = await Swal.fire({
-            title: 'Delete FAQ?',
-            text: 'This action cannot be undone.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#CC0336',
-            cancelButtonColor: '#06056C',
-            confirmButtonText: 'Yes, delete it',
-            cancelButtonText: 'Cancel',
-        });
-        if (!result.isConfirmed) return;
-        try {
-            await axios.delete(`/api/admin/faqs/${id}`);
-            toast.success('FAQ deleted successfully');
-            loadPageContent();
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to delete FAQ');
-        }
-    };
-
-    // FAQ LOCK
-    const toggleFaqLock = async (id, locked) => {
-        try {
-            await axios.patch(`/api/admin/faqs/${id}/lock`, { locked });
-            setFaqs(
-                faqs.map((faq) =>
-                    faq.id === id ? { ...faq, locked } : faq
-                )
-            );
-            toast.success(`FAQ ${locked ? 'Locked' : 'Unlocked'} Successfully`);
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to update FAQ lock status');
-        }
-    };
-
-    // EDIT FAQ
-    const editFaq = (faq) => {
-        setFaqForm({
-            question: faq.question,
-            answer: faq.answer,
-        });
-        setEditingFaqId(faq.id);
-        setFaqShowForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
 
     // LOAD PAGE SEO
     const loadPageSeo = async (page) => {
@@ -518,125 +379,7 @@ const AdminDashboardContent = () => {
             case 'services':
                 return <ServiceManagement ref={serviceRef} onFormStateChange={setServiceShowForm} />;
 
-            case 'faq':
-                return (
-                    <div className="flex flex-col gap-6 w-full">
-                        <div>
 
-                            {faqShowForm && (
-                                <div className="bg-white border border-gray-200 p-6 md:p-8 flex flex-col gap-6 mb-8 rounded-xl shadow-sm">
-                                    <h2 className="text-xl font-bold text-gray-900 mb-2">{editingFaqId ? 'Edit FAQ' : 'Configure New FAQ'}</h2>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-900">Question *</label>
-                                        <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C]"
-                                            name="question"
-                                            value={faqForm.question}
-                                            onChange={handleFaqChange}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-semibold text-gray-900">Answer *</label>
-                                        <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C]"
-                                            name="answer"
-                                            value={faqForm.answer}
-                                            onChange={handleFaqChange}
-                                            rows={4}
-                                        />
-                                    </div>
-                                    <div className="flex gap-4 mt-2">
-                                        <button
-                                            className="bg-[#06056C] hover:bg-blue-900 text-white font-semibold py-3 px-6 transition-colors shadow-sm"
-                                            onClick={saveFaq}
-                                            disabled={saving}
-                                        >
-                                            {editingFaqId ? 'Update FAQ' : 'Add FAQ'}
-                                        </button>
-                                        <button
-                                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 transition-colors border border-gray-200 shadow-sm"
-                                            onClick={resetFaqForm}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {!faqShowForm && (
-                                <div className="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm">
-                                    <div className="p-6 md:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-sm font-semibold text-gray-500 hidden md:block">
-                                                {filteredFaqs.length} found ({faqs.length} total)
-                                            </span>
-                                        </div>
-                                        <div className="relative w-full sm:w-80">
-                                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search FAQs..."
-                                                value={faqSearch}
-                                                onChange={handleFaqSearchChange}
-                                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 text-sm outline-none bg-white text-gray-900 focus:border-[#06056C] focus:ring-1 focus:ring-[#06056C] rounded-lg shadow-sm"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-500">
-                                                    <th className="py-4 px-6 font-semibold w-1/3">Question</th>
-                                                    <th className="py-4 px-6 font-semibold w-1/3">Answer</th>
-                                                    <th className="py-4 px-6 font-semibold w-1/6">Visibility</th>
-                                                    <th className="py-4 px-6 font-semibold text-right w-1/6">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {paginatedFaqs.map((faq, idx) => (
-                                                    <tr key={faq.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
-                                                        <td className="py-4 px-6 font-medium text-gray-900 align-top">
-                                                            {faq.question}
-                                                        </td>
-                                                        <td className="py-4 px-6 text-sm text-gray-600 align-top">
-                                                            <div className="line-clamp-2" title={faq.answer}>{faq.answer}</div>
-                                                        </td>
-                                                        <td className="py-4 px-6 align-top">
-                                                            <span className={`text-xs font-semibold px-2 py-1 rounded inline-flex items-center gap-1 ${faq.locked ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                                                                {faq.locked ? 'Locked' : 'Public'}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-4 px-6 align-top">
-                                                            <div className="flex justify-end items-center gap-2">
-                                                                <button onClick={() => editFaq(faq)} title="Edit FAQ" className="bg-white border border-gray-200 hover:border-[#06056C] hover:bg-[#06056C] hover:text-white text-[#06056C] p-2 rounded-lg transition-all shadow-sm flex items-center justify-center"><FiEdit2 size={16} /></button>
-                                                                <button onClick={() => toggleFaqLock(faq.id, !faq.locked)} title={faq.locked ? "Unlock FAQ" : "Lock FAQ"} className="bg-white border border-gray-200 hover:border-orange-500 hover:bg-orange-500 hover:text-white text-orange-500 p-2 rounded-lg transition-all shadow-sm flex items-center justify-center">
-                                                                    {faq.locked ? <span className="font-bold text-[10px]">🔓</span> : <span className="font-bold text-[10px]">🔒</span>}
-                                                                </button>
-                                                                <button onClick={() => deleteFaq(faq.id)} title="Delete FAQ" className="bg-white border border-gray-200 hover:border-[#CC0336] hover:bg-[#CC0336] hover:text-white text-[#CC0336] p-2 rounded-lg transition-all shadow-sm flex items-center justify-center"><FiTrash2 size={16} /></button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                        {paginatedFaqs.length === 0 && <div className="p-10 text-center text-gray-500">No FAQs found.</div>}
-                                    </div>
-
-                                    {faqTotalPages > 1 && (
-                                        <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
-                                            <span className="text-sm text-gray-500">
-                                                Showing <span className="font-medium">{filteredFaqs.length === 0 ? 0 : (faqCurrentPage - 1) * FAQ_ITEMS_PER_PAGE + 1}</span> to <span className="font-medium">{Math.min(faqCurrentPage * FAQ_ITEMS_PER_PAGE, filteredFaqs.length)}</span> of <span className="font-medium">{filteredFaqs.length}</span> FAQs
-                                            </span>
-                                            <div className="flex gap-2">
-                                                <button disabled={faqCurrentPage === 1} onClick={() => setFaqCurrentPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Previous</button>
-                                                <button disabled={faqCurrentPage === faqTotalPages || faqTotalPages === 0} onClick={() => setFaqCurrentPage(p => Math.min(faqTotalPages, p + 1))} className="px-3 py-1.5 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Next</button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
 
             case 'seo': {
                 const availablePagesList = [
@@ -901,7 +644,6 @@ const AdminDashboardContent = () => {
         locations: { title: 'Manage States, Districts & Cities', desc: 'Create, edit, and organize Provinces (States), Regions (Districts) and Cities (Locations) to configure dynamic catchment pages.' },
         blogs: { title: 'Blog Posts', desc: 'Create and manage your blog posts.' },
         about: { title: 'About Page', desc: 'Edit the About Us page details.' },
-        faq: { title: 'FAQs', desc: 'Manage frequently asked questions.' },
         services: { title: 'Services Management', desc: 'Create and manage the services offered by Galaxy Movers Regina.' },
         seo: { title: 'SEO Manager', desc: 'Manage your website SEO metadata.' },
     };
@@ -929,14 +671,7 @@ const AdminDashboardContent = () => {
                             <span className="text-lg leading-none">+</span> Add Page SEO
                         </button>
                     )}
-                    {selectedTab === 'faq' && !faqShowForm && (
-                        <button
-                            onClick={openNewFaq}
-                            className="bg-[#06056C] hover:bg-blue-900 text-white font-bold py-2.5 px-6 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
-                        >
-                            <FiPlus /> Add FAQ
-                        </button>
-                    )}
+
                     {selectedTab === 'blogs' && !blogShowForm && (
                         <button
                             onClick={() => blogRef.current?.openNewBlog()}

@@ -66,12 +66,7 @@ const AdminDashboardContent = () => {
             'Galaxy Movers Regina delivers reliable moving services.',
     });
 
-    const [faqs, setFaqs] = useState([]);
-    const [faqForm, setFaqForm] = useState({
-        question: '',
-        answer: '',
-    });
-    const [editingFaqId, setEditingFaqId] = useState(null);
+
 
     // NEW STATES FOR SEO PAGE MANAGER & GLOBAL SCRIPTS
     const [seoCurrentPage, setSeoCurrentPage] = useState(1);
@@ -105,7 +100,7 @@ const AdminDashboardContent = () => {
     const locationRef = useRef(null);
     const [locationState, setLocationState] = useState({ showForm: false, activeTab: 'provinces' });
 
-    const [faqShowForm, setFaqShowForm] = useState(false);
+
 
     useEffect(() => {
         const admin = localStorage.getItem('admin');
@@ -121,16 +116,11 @@ const AdminDashboardContent = () => {
 
     const loadPageContent = async () => {
         try {
-            const [homeResponse, aboutResponse, faqResponse] =
+            const [homeResponse, aboutResponse] =
                 await Promise.all([
                     axios.get('/api/content/page/home'),
                     axios.get('/api/content/page/about'),
-                    axios.get('/api/admin/faqs'),
                 ]);
-
-            if (faqResponse.data.success) {
-                setFaqs(faqResponse.data.faqs || []);
-            }
 
             if (homeResponse.data.success) {
                 const pageContent = homeResponse.data.content || {};
@@ -226,21 +216,7 @@ const AdminDashboardContent = () => {
         });
     };
 
-    // FAQ
-    const handleFaqChange = (e) => {
-        setFaqForm({
-            ...faqForm,
-            [e.target.name]: e.target.value,
-        });
-    };
 
-    const resetFaqForm = () => {
-        setFaqForm({
-            question: '',
-            answer: '',
-        });
-        setEditingFaqId(null);
-    };
 
     // SAVE HERO
     const saveHeroContent = async () => {
@@ -298,83 +274,7 @@ const AdminDashboardContent = () => {
         }
     };
 
-    // FAQ LOAD
-    const loadFaqs = async () => {
-        try {
-            const response = await axios.get('/api/admin/faqs');
-            if (response.data.success) {
-                setFaqs(response.data.faqs || []);
-            }
-        } catch (error) {
-            console.error('Failed to load FAQs', error);
-        }
-    };
 
-    // SAVE FAQ
-    const saveFaq = async () => {
-        if (!faqForm.question || !faqForm.answer) {
-            toast.error('Question and Answer are required');
-            return;
-        }
-
-        setSaving(true);
-        try {
-            if (editingFaqId) {
-                await axios.put(`/api/admin/faqs/${editingFaqId}`, faqForm);
-                toast.success('FAQ updated successfully');
-            } else {
-                await axios.post('/api/admin/faqs', faqForm);
-                toast.success('FAQ added successfully');
-            }
-            resetFaqForm();
-            loadPageContent();
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to save FAQ');
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // DELETE FAQ
-    const deleteFaq = async (id) => {
-        if (window.confirm('Are you sure you want to delete this FAQ?')) {
-            try {
-                await axios.delete(`/api/admin/faqs/${id}`);
-                toast.success('FAQ deleted successfully');
-                loadPageContent();
-            } catch (error) {
-                console.error(error);
-                toast.error('Failed to delete FAQ');
-            }
-        }
-    };
-
-    // FAQ LOCK
-    const toggleFaqLock = async (id, locked) => {
-        try {
-            await axios.patch(`/api/admin/faqs/${id}/lock`, { locked });
-            setFaqs(
-                faqs.map((faq) =>
-                    faq.id === id ? { ...faq, locked } : faq
-                )
-            );
-            toast.success(`FAQ ${locked ? 'Locked' : 'Unlocked'} Successfully`);
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to update FAQ lock status');
-        }
-    };
-
-    // EDIT FAQ
-    const editFaq = (faq) => {
-        setFaqForm({
-            question: faq.question,
-            answer: faq.answer,
-        });
-        setEditingFaqId(faq.id);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
 
     // LOAD PAGE SEO
     const loadPageSeo = async (page) => {
@@ -621,106 +521,7 @@ const AdminDashboardContent = () => {
                     </div>
                 );
 
-            case 'faq':
-                return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                        {faqShowForm && (
-                            <div className="bg-white p-6 md:p-8 border border-gray-200 flex flex-col gap-4">
-                                <h2>{editingFaqId ? 'Edit FAQ' : 'Add FAQ'}</h2>
-                                <div className="flex flex-col gap-2">
-                                    <label>Question</label>
-                                    <input className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                                        name="question"
-                                        value={faqForm.question}
-                                        onChange={handleFaqChange}
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label>Answer</label>
-                                    <textarea className="w-full border border-gray-300 p-3 text-sm outline-none bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                                        name="answer"
-                                        value={faqForm.answer}
-                                        onChange={handleFaqChange}
-                                        rows={4}
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button
-                                        className="w-fit px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer transition-colors"
-                                        onClick={saveFaq}
-                                        disabled={saving}
-                                    >
-                                        {editingFaqId ? 'Update FAQ' : 'Add FAQ'}
-                                    </button>
-                                    {editingFaqId && (
-                                        <button
-                                            className="w-fit px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer transition-colors"
-                                            style={{ backgroundColor: '#64748b' }}
-                                            onClick={resetFaqForm}
-                                        >
-                                            Cancel
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
 
-                        {!faqShowForm && (
-                            <div className="bg-white p-6 md:p-8 border border-gray-200 flex flex-col gap-4">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                    <div style={{ width: '300px' }}>
-                                        <input
-                                            type="text"
-                                            placeholder="Search FAQs..."
-                                            value={faqSearch}
-                                            onChange={handleFaqSearchChange}
-                                            className="w-full border border-gray-300 p-2 text-sm outline-none bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                                        />
-                                    </div>
-                                </div>
-                                <h2>All FAQs ({faqs.length})</h2>
-                                <div className="location-list">
-                                    {faqs.map((faq) => (
-                                        <div
-                                            className="location-item"
-                                            key={faq.id}
-                                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderBottom: '1px solid #f1f5f9' }}
-                                        >
-                                            <div style={{ flex: 1, paddingRight: '16px' }}>
-                                                <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', color: '#0f172a' }}>{faq.question}</h4>
-                                                <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: '1.5' }}>{faq.answer}</p>
-                                                <span style={{ fontSize: '11px', display: 'inline-block', marginTop: '8px', padding: '2px 6px', borderRadius: '4px', fontWeight: 500, backgroundColor: faq.locked ? '#fee2e2' : '#dcfce7', color: faq.locked ? '#991b1b' : '#15803d' }}>
-                                                    {faq.locked ? '🔒 Locked (Internal Only)' : '🌍 Public'}
-                                                </span>
-                                            </div>
-                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                <button
-                                                    className="btn btn-edit"
-                                                    onClick={() => editFaq(faq)}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="btn"
-                                                    style={{ backgroundColor: faq.locked ? '#22c55e' : '#f59e0b', color: '#fff' }}
-                                                    onClick={() => toggleFaqLock(faq.id, !faq.locked)}
-                                                >
-                                                    {faq.locked ? 'Unlock' : 'Lock'}
-                                                </button>
-                                                <button
-                                                    className="btn btn-delete"
-                                                    onClick={() => deleteFaq(faq.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                );
 
             case 'seo':
                 if (subTab === 'new') {
@@ -1095,7 +896,6 @@ const AdminDashboardContent = () => {
         locations: { title: 'Manage States, Districts & Cities', desc: 'Create, edit, and organize Provinces (States), Regions (Districts) and Cities (Locations) to configure dynamic catchment pages.' },
         blogs: { title: 'Blog Posts', desc: 'Create and manage your blog posts.' },
         about: { title: 'About Page', desc: 'Edit the About Us page details.' },
-        faq: { title: 'FAQs', desc: 'Manage frequently asked questions.' },
         services: { title: 'Services Management', desc: 'Create and manage the services offered by Galaxy Movers Regina.' },
         seo: { title: 'SEO Manager', desc: 'Manage your website SEO metadata.' },
     };
@@ -1123,14 +923,7 @@ const AdminDashboardContent = () => {
                             <span className="text-lg leading-none">+</span> Add Page SEO
                         </button>
                     )}
-                    {selectedTab === 'faq' && !faqShowForm && (
-                        <button
-                            onClick={openNewFaq}
-                            style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '10px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-                        >
-                            + Add FAQ
-                        </button>
-                    )}
+
                     {selectedTab === 'blogs' && !blogShowForm && (
                         <button
                             onClick={() => blogRef.current?.openNewBlog()}

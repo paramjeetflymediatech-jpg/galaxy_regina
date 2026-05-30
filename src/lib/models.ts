@@ -100,42 +100,6 @@ Blog.init(
   }
 );
 
-// 3. Faq Model
-export class Faq extends Model {
-  declare id: number;
-  declare question: string;
-  declare answer: string;
-  declare locked: boolean;
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
-}
-Faq.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    question: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    answer: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    locked: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-  },
-  {
-    sequelize,
-    tableName: 'faqs',
-    underscored: true,
-  }
-);
 
 // 4. Quote Model
 export class Quote extends Model {

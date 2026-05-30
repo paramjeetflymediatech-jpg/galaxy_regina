@@ -5,7 +5,6 @@ import {
     FiMapPin,
     FiFileText,
     FiPackage,
-    FiHelpCircle,
     FiSearch,
     FiCode,
     FiLogOut,
@@ -19,7 +18,6 @@ const menuItems = [
     { key: 'locations', label: 'States & Districts', icon: <FiMapPin size={18} /> },
     { key: 'blogs', label: 'Blogs', icon: <FiFileText size={18} /> },
     { key: 'services', label: 'Services', icon: <FiPackage size={18} /> },
-    { key: 'faq', label: 'FAQs', icon: <FiHelpCircle size={18} /> },
     { key: 'seo', label: 'SEO Manager', icon: <FiSearch size={18} /> },
 ];
 
