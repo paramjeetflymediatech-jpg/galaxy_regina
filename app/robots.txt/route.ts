@@ -12,7 +12,9 @@ export async function GET(request: Request) {
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-
+Disallow: /test-route/
+Disallow: /*?_rsc=
+Disallow: /*&_rsc=
 Sitemap: ${baseUrl}/sitemap.xml
 `;
 
