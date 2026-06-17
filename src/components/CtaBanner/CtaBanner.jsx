@@ -16,9 +16,9 @@ const CtaBanner = () => {
             Ready to move? Galaxy Movers Regina is here to make your relocation simple, safe, and stress-free. Contact our experienced movers in Regina today for local moving, long distance moving, packing, storage, furniture moving, apartment moving, office relocation, and complete moving support across Regina, SK.
           </p>
 
-          <button className="cta-button">
+          <a href="/book-appointment" className="cta-button">
             → CLICK HERE TO GET A QUOTE
-          </button>
+          </a>
         </div>
       </div>
     </section>

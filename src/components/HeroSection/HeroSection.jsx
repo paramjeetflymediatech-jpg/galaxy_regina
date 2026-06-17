@@ -66,9 +66,9 @@ const Home = () => {
           </p>
 
           <div className="hero-buttons">
-            <button className="btn btn-red">
+            <a href="/book-appointment" className="btn btn-red">
               📞 GET QUOTE
-            </button>
+            </a>
             <a href="tel:3064500708" className="btn btn-red">
               📱 (306) 450 0708
             </a>

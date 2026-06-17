@@ -16,7 +16,7 @@ const Trusted = () => {
             </p>
 
             <div className="trusted-buttons">
-              <button className="btn btn-primary">GET FREE QUOTE</button>
+              <a href="/book-appointment" className="btn btn-primary">GET FREE QUOTE</a>
               <a href="tel:3064500708" className="btn btn-secondary">
                 ☎️ (306) 450 0708
               </a>
