@@ -23,8 +23,18 @@ export function getRecipientEmails(): string[] {
  */
 export function createTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const secure = process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : port === 465;
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
+  
+  // Port 587 uses STARTTLS (must be secure: false). Port 465 uses direct SSL/TLS (must be secure: true).
+  let secure = port === 465;
+  if (process.env.SMTP_SECURE !== undefined) {
+    if (port === 587 || port === 25) {
+      secure = false;
+    } else {
+      secure = process.env.SMTP_SECURE === 'true';
+    }
+  }
+
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
@@ -33,8 +43,13 @@ export function createTransporter() {
     port,
     secure,
     auth: user && pass ? { user, pass } : undefined,
-  });
+    family: 4, // Force IPv4 to prevent IPv6 DNS resolution failures
+    tls: {
+      rejectUnauthorized: false,
+    },
+  } as any);
 }
+
 
 export interface QuoteEmailData {
   full_name: string;
