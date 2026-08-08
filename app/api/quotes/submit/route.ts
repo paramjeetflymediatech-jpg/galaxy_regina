@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Quote } from '@/src/lib/models';
+import { sendQuoteNotificationEmail } from '@/src/lib/nodemailer';
 
 export async function POST(request: Request) {
   try {
@@ -34,6 +35,22 @@ export async function POST(request: Request) {
       status: 'pending',
     });
 
+    // Send email notification to configured recipients
+    try {
+      await sendQuoteNotificationEmail({
+        full_name,
+        email,
+        mobile,
+        move_type,
+        pickup_address,
+        dropoff_address,
+        moving_date,
+        comments,
+      });
+    } catch (emailError) {
+      console.error('Failed to send quote notification email:', emailError);
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -50,3 +67,4 @@ export async function POST(request: Request) {
     );
   }
 }
+
